@@ -15,7 +15,7 @@ func GetListAddons() (*Response, error) {
 	_, directoryContent, res, err := client.Repositories.GetContents(
 		context.Background(),
 		env.GetOwner(), env.GetRepository(), env.GetPath(),
-		&github.RepositoryContentGetOptions{})
+		&github.RepositoryContentGetOptions{Ref: env.GetRef()})
 	if res.Rate.Remaining == 0 && err != nil {
 		e := errors.New("number of requests available early 0")
 		errors.Join(err, e)
