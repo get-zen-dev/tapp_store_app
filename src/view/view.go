@@ -1,54 +1,73 @@
 package view
 
 import (
-	"fmt"
+	"unicode"
 
-	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/76creates/stickers/flexbox"
+	"github.com/76creates/stickers/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
 )
 
 const (
-	COLUMN_KEY_ID              = "ID"
-	COLUMN_KEY_IMAGE           = "IMAGE"
+	COLUMN_KEY_NUMBER          = "NUMBER"
 	COLUMN_KEY_TITLE           = "TITLE"
 	COLUMN_KEY_STATUS          = "STATUS"
 	COLUMN_KEY_CURRENT_VERSION = "CURRENT_VERSION"
 	COLUMN_KEY_LAST_VERSION    = "LAST_VERSION"
 
-	COLUMN_TITLE_ID              = "id"
-	COLUMN_TITLE_IMAGE           = "image"
+	COLUMN_TITLE_NUMBER          = "number"
 	COLUMN_TITLE_TITLE           = "title"
 	COLUMN_TITLE_STATUS          = "status"
 	COLUMN_TITLE_CURRENT_VERSION = "current version"
 	COLUMN_TITLE_LAST_VERSION    = "last version"
 
-	COLUMN_FLEX_ID              = 1
-	COLUMN_FLEX_IMAGE           = 3
+	COLUMN_FLEX_NUMBER          = 1
 	COLUMN_FLEX_TITLE           = 6
 	COLUMN_FLEX_STATUS          = 6
 	COLUMN_FLEX_CURRENT_VERSION = 3
 	COLUMN_FLEX_LAST_VERSION    = 3
 
-	MARGI_RIGHT = 0
-	MARGI_LEFT  = 0
+	COLUMN_MIN_SIZE_NUMBER          = 1
+	COLUMN_MIN_SIZE_TITLE           = 6
+	COLUMN_MIN_SIZE_STATUS          = 6
+	COLUMN_MIN_SIZE_CURRENT_VERSION = 3
+	COLUMN_MIN_SIZE_LAST_VERSION    = 3
 
-	colorWater = "#22BEDA"
-	colorNeon  = "#20CF97"
-
-	PER_PAGE = 7
+	MARGIN_RIGHT = 0
+	MARGIN_LEFT  = 0
 )
 
 var (
-	styleBase = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(colorWater)).
-		BorderForeground(lipgloss.Color(colorNeon)).
-		Align(lipgloss.Right)
+	headers = []string{
+		COLUMN_KEY_NUMBER,
+		COLUMN_KEY_TITLE,
+		COLUMN_KEY_STATUS,
+		COLUMN_KEY_CURRENT_VERSION,
+		COLUMN_KEY_LAST_VERSION,
+	}
+
+	ratio = []int{
+		COLUMN_FLEX_NUMBER,
+		COLUMN_FLEX_TITLE,
+		COLUMN_FLEX_STATUS,
+		COLUMN_FLEX_CURRENT_VERSION,
+		COLUMN_FLEX_LAST_VERSION,
+	}
+
+	minSize = []int{
+		COLUMN_MIN_SIZE_NUMBER,
+		COLUMN_MIN_SIZE_TITLE,
+		COLUMN_MIN_SIZE_STATUS,
+		COLUMN_MIN_SIZE_CURRENT_VERSION,
+		COLUMN_MIN_SIZE_LAST_VERSION,
+	}
+
+	selectedValue = "\nselect something with spacebar or enter"
 )
 
 type Item struct {
-	Image          string
+	Number         string
 	Title          string
 	Status         string
 	CurrentVersion string
@@ -56,91 +75,133 @@ type Item struct {
 }
 
 type Items struct {
-	slice []table.Row
+	items [][]string
 }
 
-func NewItems(newSlice []table.Row) *Items {
-	return &Items{newSlice}
+func NewItems() *Items {
+	return &Items{}
 }
 
-func (i *Items) Append(item Item) {
-	i.slice = append(i.slice, makeRow(fmt.Sprintf("%v", len(i.slice)+1), item.Image, item.Title, item.Status, item.CurrentVersion, item.LastVersion))
+func (i *Items) Append(item *Item) {
+	i.items = append(i.items, makeRow(item))
 }
 
-func (i *Items) GetRows() []table.Row {
-	return i.slice
+func makeRow(item *Item) []string {
+	return []string{
+		item.Number,
+		item.Title,
+		item.Status,
+		item.CurrentVersion,
+		item.LastVersion,
+	}
 }
 
-func makeRow(ID, image, title, status, currentVersion, lastVersion string) table.Row {
-	return table.NewRow(table.RowData{
-		COLUMN_KEY_ID:              ID,
-		COLUMN_KEY_IMAGE:           image,
-		COLUMN_KEY_TITLE:           title,
-		COLUMN_KEY_STATUS:          status,
-		COLUMN_KEY_CURRENT_VERSION: currentVersion,
-		COLUMN_KEY_LAST_VERSION:    lastVersion,
-	})
+func (i *Items) GetItems() [][]string {
+	return i.items
 }
 
 type Model struct {
-	addonTable      table.Model
-	filterTextInput textinput.Model
-	totalWidth      int
-	totalMargin     int
+	table   *table.TableSingleType[string]
+	infoBox *flexbox.FlexBox
+	headers []string
 }
 
-func NewModel(data []table.Row) Model {
-	return Model{
-		addonTable: table.New([]table.Column{
-			table.NewFlexColumn(COLUMN_KEY_ID, COLUMN_TITLE_ID, COLUMN_FLEX_ID),
-			table.NewFlexColumn(COLUMN_KEY_IMAGE, COLUMN_TITLE_IMAGE, COLUMN_FLEX_IMAGE),
-			table.NewFlexColumn(COLUMN_KEY_TITLE, COLUMN_TITLE_TITLE, COLUMN_FLEX_TITLE),
-			table.NewFlexColumn(COLUMN_KEY_STATUS, COLUMN_TITLE_STATUS, COLUMN_FLEX_STATUS),
-			table.NewFlexColumn(COLUMN_KEY_CURRENT_VERSION, COLUMN_TITLE_CURRENT_VERSION, COLUMN_FLEX_CURRENT_VERSION),
-			table.NewFlexColumn(COLUMN_KEY_LAST_VERSION, COLUMN_TITLE_LAST_VERSION, COLUMN_FLEX_LAST_VERSION),
-		}).WithRows(data).
-			Filtered(true).
-			BorderRounded().
-			WithPageSize(PER_PAGE).
-			SortByAsc(COLUMN_KEY_TITLE).
-			WithBaseStyle(styleBase).
-			Focused(true),
-		totalMargin:     MARGI_LEFT + MARGI_RIGHT,
-		filterTextInput: textinput.New(),
+func NewModel(data [][]string) *Model {
+	m := Model{
+		table:   table.NewTableSingleType[string](0, 0, headers),
+		infoBox: flexbox.New(0, 0).SetHeight(7),
+		headers: headers,
 	}
+	m.table.SetStylePassing(true)
+	m.table.SetRatio(ratio).SetMinWidth(minSize)
+	m.table.AddRows(data)
+
+	infoText := `
+use the arrows to navigate
+ctrl+s: sort by current column
+alphanumerics: filter column
+enter, spacebar: get column value
+ctrl+c: quit`
+
+	r1 := m.infoBox.NewRow()
+	r1.AddCells(
+		flexbox.NewCell(1, 1).
+			SetID("info").
+			SetContent(infoText),
+		flexbox.NewCell(1, 1).
+			SetID("info").
+			SetContent(selectedValue).
+			SetStyle(lipgloss.NewStyle().Bold(true)),
+	)
+	m.infoBox.AddRows([]*flexbox.Row{r1})
+	return &m
 }
 
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
-	)
-	m.addonTable, cmd = m.addonTable.Update(msg)
-	cmds = append(cmds, cmd)
-
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.table.SetWidth(msg.Width)
+		m.table.SetHeight(msg.Height - m.infoBox.GetHeight())
+		m.infoBox.SetWidth(msg.Width)
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c":
-			cmds = append(cmds, tea.Quit)
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "down":
+			m.table.CursorDown()
+		case "up":
+			m.table.CursorUp()
+		case "left":
+			m.table.CursorLeft()
+		case "right":
+			m.table.CursorRight()
+		case "ctrl+s":
+			x, _ := m.table.GetCursorLocation()
+			m.table.OrderByColumn(x)
+		case "enter", " ":
+			selectedValue = m.table.GetCursorValue()
+			m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
+		case "backspace":
+			m.filterWithStr(msg.String())
+		default:
+			if len(msg.String()) == 1 {
+				r := msg.Runes[0]
+				if unicode.IsLetter(r) || unicode.IsDigit(r) {
+					m.filterWithStr(msg.String())
+				}
+			}
 		}
-	case tea.WindowSizeMsg:
-		m.totalWidth = msg.Width
-		m.recalculateTable()
+
 	}
-
-	return m, tea.Batch(cmds...)
+	return m, nil
 }
 
-func (m *Model) recalculateTable() {
-	m.addonTable = m.addonTable.WithTargetWidth(m.totalWidth - m.totalMargin)
+func (m *Model) filterWithStr(key string) {
+	i, s := m.table.GetFilter()
+	x, _ := m.table.GetCursorLocation()
+	if x != i && key != "backspace" {
+		m.table.SetFilter(x, key)
+		return
+	}
+	if key == "backspace" {
+		if len(s) == 1 {
+			m.table.UnsetFilter()
+			return
+		} else if len(s) > 1 {
+			s = s[0 : len(s)-1]
+		} else {
+			return
+		}
+	} else {
+		s = s + key
+	}
+	m.table.SetFilter(i, s)
 }
 
-func (m Model) View() string {
-	view := lipgloss.JoinVertical(lipgloss.Right, m.addonTable.View()) + "\n"
-	return lipgloss.NewStyle().Render(view)
+func (m *Model) View() string {
+	return lipgloss.JoinVertical(lipgloss.Left, m.table.Render(), m.infoBox.Render())
 }

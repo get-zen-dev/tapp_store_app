@@ -1,3 +1,3 @@
-[submodule "src/bubble-table"]
-	path = src/bubble-table
-	url = git@github.com:RazerFord/bubble-table.git
+[submodule "src/table"]
+	path = src/table
+	url = git@github.com:RazerFord/stickers.git
