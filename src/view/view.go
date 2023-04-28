@@ -37,14 +37,14 @@ const (
 	colorWater = "#22BEDA"
 	colorNeon  = "#20CF97"
 
-	PER_PAGE = 5
+	PER_PAGE = 7
 )
 
 var (
 	styleBase = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(colorWater)).
 		BorderForeground(lipgloss.Color(colorNeon)).
-		Align(lipgloss.Center)
+		Align(lipgloss.Right)
 )
 
 type Item struct {
@@ -141,5 +141,6 @@ func (m *Model) recalculateTable() {
 }
 
 func (m Model) View() string {
-	return lipgloss.NewStyle().Render(m.addonTable.View())
+	view := lipgloss.JoinVertical(lipgloss.Right, m.addonTable.View()) + "\n"
+	return lipgloss.NewStyle().Render(view)
 }
