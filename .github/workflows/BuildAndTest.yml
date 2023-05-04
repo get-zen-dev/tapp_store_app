@@ -1,8 +1,6 @@
 name: Build and test
 
-on:
-  release:
-    types: [created]
+on: [pull_request, push, workflow_call]
 
 jobs:
   tests:
