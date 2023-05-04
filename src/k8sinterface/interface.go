@@ -1,17 +1,17 @@
 package k8sinterface
 
 type ModuleInfo struct {
-	Name    string
-	Status  string
-	Route   string
-	Version string
+	Name      string
+	IsEnabled bool
+	//Route   string
+	//Version string
 }
 
 type KuberInterface interface {
-	InitKuber()
+	InitKuber() error
 
-	InstallModule(name string) ModuleInfo
-	RemoveModule(name string) bool
-	GetModuleInfo(name string) ModuleInfo
+	InstallModule(name string) (*ModuleInfo, error)
+	RemoveModule(name string) error
+	GetModuleInfo(name string) (*ModuleInfo, error)
 	//UpdateModule(name string) ModuleInfo
 }
