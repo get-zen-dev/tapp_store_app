@@ -14,7 +14,7 @@ jobs:
         goos: [linux]
         goarch: [amd64]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run tests
         run: cd ./src/app && go test -v -p=1 -timeout=0 ./...
       - uses: wangyoucao577/go-release-action@v1.16
