@@ -4,7 +4,7 @@ on: [pull_request, workflow_call]
 
 jobs:
   tests:
-    name: Release Go Binary
+    name: Build binary and test
     runs-on: ubuntu-latest
     strategy:
       matrix:
