@@ -6,4 +6,5 @@ use (
 	./requests
 	./table
 	./view
+	./k8sinterface
 )
