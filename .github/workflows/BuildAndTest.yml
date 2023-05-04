@@ -1,6 +1,6 @@
 name: Build and test
 
-on: [pull_request, push, workflow_call]
+on: [pull_request, workflow_call]
 
 jobs:
   tests:
@@ -14,4 +14,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: go test -v -p=1 -timeout=0 ./...
+        run: cd ./src/app && go test -v -p=1 -timeout=0 ./...
