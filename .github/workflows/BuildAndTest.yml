@@ -13,5 +13,7 @@ jobs:
         goarch: [amd64]
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Run tests
         run: cd ./src/app && go test -v -p=1 -timeout=0 ./...
