@@ -1,6 +1,7 @@
 package view
 
 import (
+	"fmt"
 	"unicode"
 
 	"github.com/76creates/stickers/flexbox"
@@ -15,6 +16,12 @@ const (
 	COLUMN_KEY_STATUS          = "STATUS"
 	COLUMN_KEY_CURRENT_VERSION = "CURRENT_VERSION"
 	COLUMN_KEY_LAST_VERSION    = "LAST_VERSION"
+
+	COLUMN_INDEX_NUMBER          = 0
+	COLUMN_INDEX_TITLE           = 1
+	COLUMN_INDEX_STATUS          = 2
+	COLUMN_INDEX_CURRENT_VERSION = 3
+	COLUMN_INDEX_LAST_VERSION    = 4
 
 	COLUMN_TITLE_NUMBER          = "number"
 	COLUMN_TITLE_TITLE           = "title"
@@ -170,14 +177,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			x, _ := m.table.GetCursorLocation()
 			m.table.OrderByColumn(x)
 		case "i":
-			selectedValue = m.table.GetCursorValue()
-			m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
+			name := m.table.GetValueOfColumnId(COLUMN_INDEX_TITLE)
+			m.infoBox.GetRow(0).GetCell(1).SetContent(fmt.Sprintf("\n%s is installed", name))
+			go func(cell *flexbox.Cell, text string) {
+				cell.SetContent("hohohohho")
+			}(m.infoBox.GetRow(0).GetCell(1), "TutorialsPoint");
 		case "d":
-			// selectedValue = m.table.GetCursorValue()
-			// m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
+			name := m.table.GetValueOfColumnId(COLUMN_INDEX_TITLE)
+			m.infoBox.GetRow(0).GetCell(1).SetContent(fmt.Sprintf("\n%s is deleted", name))
 		case "u":
-			// selectedValue = m.table.GetCursorValue()
-			// m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
+			name := m.table.GetValueOfColumnId(COLUMN_INDEX_TITLE)
+			m.infoBox.GetRow(0).GetCell(1).SetContent(fmt.Sprintf("\n%s is updated", name))
 		case "backspace":
 			m.filterWithStr(msg.String())
 		default:
