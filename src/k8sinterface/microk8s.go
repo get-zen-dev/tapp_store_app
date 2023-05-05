@@ -221,3 +221,13 @@ func CheckInstalledOrInstalKuber() error {
 	}
 	return nil
 }
+
+func Start() error {
+	command := "start" 
+	return invokeCommand(commandCore, command)
+}
+
+func Stop() error {
+	command := "stop" 
+	return invokeCommand(commandCore, command)
+}
