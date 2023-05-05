@@ -9,15 +9,20 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"view"
+
+	k8 "k8sinterface"
 )
 
 func main() {
+	k8.CheckInstalledOrInstalKuber()
 	env.SetUpEnv()
 	list, err := requests.GetListAddons()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	fmt.Println(k8.SUStatus())
 
 	items := view.NewItems()
 	for i, v := range list.Value() {
