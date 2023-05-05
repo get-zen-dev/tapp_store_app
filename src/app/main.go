@@ -15,20 +15,19 @@ import (
 
 func main() {
 	k8.CheckInstalledOrInstalKuber()
+	v8 := k8.Microk8sClient{}
+	v8.InitKuber()
+	k8.Start()
 	env.SetUpEnv()
 	list, err := requests.GetListAddons()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	fmt.Println(k8.SUStatus())
-
 	items := view.NewItems()
-	for i, v := range list.Value() {
+	for _, v := range list.Value() {
 		items.Append(&view.Item{
-			Number:         fmt.Sprintf("%v", i),
-			Title:          fmt.Sprintf("%s%v", v.Name, i),
+			Title:          v.Name,
 			Status:         "installed",
 			CurrentVersion: "1.1.0",
 			LastVersion:    "1.1.0"})
@@ -38,4 +37,5 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	k8.Stop()
 }
