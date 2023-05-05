@@ -3,6 +3,7 @@ package k8sinterface
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -86,8 +87,102 @@ func (m *Microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 	return &result, nil
 }
 
+func invokeCommandInteractive(command string) error {
+	cmd := exec.Command("sh", "-c", command)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func InitKuberInteractive() error {
+	installMicrok8s := "snap install microk8s --classic"
+	cmd := exec.Command("sh", "-c", installMicrok8s)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	addons := []string{"dns", "community", "traefik"}
+
+	for i := range addons {
+		installAddon := fmt.Sprintf("%s enable %s", commandCore, addons[i])
+		cmd := exec.Command("sh", "-c", installAddon)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func CheckInstallMicrok8s() bool {
 	cmd := fmt.Sprintf("dpkg -l | grep -w %s", commandCore)
-	_, err := exec.Command("bash", "-c", cmd).Output()
-	return err != nil
+	_, err := exec.Command("sh", "-c", cmd).Output()
+	return err == nil
+}
+func CheckInstallSnap() bool {
+	cmd := "dpkg -l | grep -w snap"
+	_, err := exec.Command("sh", "-c", cmd).Output()
+	return err == nil
+}
+
+func InstallSnap() error {
+	update := "sudo apt update"
+	installSnap := "sudo apt install snapd"
+	cmd := exec.Command("sh", "-c", update)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf(err.Error(), errors.New("error update"))
+	}
+	cmd = exec.Command("sh", "-c", installSnap)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf(err.Error(), errors.New("error install"))
+	}
+	return nil
+}
+
+var su bool = checkGranted()
+
+func checkGranted() bool {
+	cmd := "id"
+	out, _ := exec.Command("sh", "-c", cmd).Output()
+	return strings.Contains(string(out), "uid=0")
+}
+
+func SUStatus() bool {
+	return su
+}
+
+func CheckInstalledOrInstalKuber() error {
+	var err error
+	if !CheckInstallSnap() {
+		fmt.Println("Snap package manager is not installed. You need to install. Enter password to install:")
+		err = InstallSnap()
+	}
+	if err != nil {
+		return err
+	}
+	if !CheckInstallMicrok8s() {
+		fmt.Println("Microk8s is not installed.\nThe following addons will also be installed: dns, community, traefik. \nEnter password to install:")
+		err = InitKuberInteractive()
+	}
+	if err != nil {
+		return err
+	}
+	return nil
 }
