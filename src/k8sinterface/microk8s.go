@@ -1,6 +1,7 @@
 package k8sinterface
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -88,7 +89,7 @@ func (m *Microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 }
 
 func invokeCommandInteractive(command string) error {
-	cmd := exec.Command("sh", "-c", command)
+	cmd := exec.Command("bash", "-c", command)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -122,16 +123,55 @@ func checkInstall(app string) bool {
 }
 
 func CheckInstallMicrok8s() bool {
-	return checkInstall(commandCore)
+	cmd := "microk8s"
+	_, err := exec.Command("sh", "-c", cmd).Output()
+	return err != nil
 }
 
 func CheckInstallSnap() bool {
 	return checkInstall("snap")
 }
 
+func CheckInGroupMicrok8s() bool {
+	cmd := "groups | grep -w microk8s"
+	_, err := exec.Command("sh", "-c", cmd).Output()
+	return err == nil
+}
+
+func GetUserName() (string, error) {
+	cmd := "whoami"
+	ans, err := exec.Command("sh", "-c", cmd).Output()
+	return string(ans), err
+}
+
+func AddGroupMicrok8s() error {
+	username, err := GetUserName()
+	if err != nil {
+		return err
+	}
+	cmd := fmt.Sprintf("sudo usermod -a -G microk8s %s", username)
+	err = invokeCommandInteractive(cmd)
+	if err != nil {
+		return err
+	}
+	cmd = "newgrp microk8s"
+	err = invokeCommandInteractive(cmd)
+	if err != nil {
+		return err
+	}
+	cmd = "sudo mkdir ~/.kube"
+	err = invokeCommandInteractive(cmd)
+	if err != nil {
+		return err
+	}
+	cmd = fmt.Sprintf("sudo chown -R %s ~/.kube", username)
+	err = invokeCommandInteractive(cmd)
+	return err
+}
+
 func InstallSnap() error {
 	update := "sudo apt update"
-	installSnap := "sudo apt install snapd"
+	installSnap := "apt install snapd"
 	err := invokeCommandInteractive(update)
 	if err != nil {
 		return fmt.Errorf(err.Error(), errors.New("error update"))
@@ -167,6 +207,14 @@ func CheckInstalledOrInstalKuber() error {
 	if !CheckInstallMicrok8s() {
 		fmt.Println("Microk8s is not installed.\nThe following addons will also be installed: dns, community, traefik. \nEnter password to install:")
 		err = InitKuberInteractive()
+	}
+	if !CheckInGroupMicrok8s() {
+		fmt.Print("Add user to microk8s group? [Y/N]")
+		reader := bufio.NewReader(os.Stdin)
+		char, _, _ := reader.ReadRune()
+		if char == 'Y' || char == 'y' {
+			err = AddGroupMicrok8s()
+		}
 	}
 	if err != nil {
 		return err
