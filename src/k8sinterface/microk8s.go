@@ -97,11 +97,7 @@ func invokeCommandInteractive(command string) error {
 
 func InitKuberInteractive() error {
 	installMicrok8s := "snap install microk8s --classic"
-	cmd := exec.Command("sh", "-c", installMicrok8s)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	err := invokeCommandInteractive(installMicrok8s)
 	if err != nil {
 		return err
 	}
@@ -110,11 +106,7 @@ func InitKuberInteractive() error {
 
 	for i := range addons {
 		installAddon := fmt.Sprintf("%s enable %s", commandCore, addons[i])
-		cmd := exec.Command("sh", "-c", installAddon)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
+		err := invokeCommandInteractive(installAddon)
 		if err != nil {
 			return err
 		}
@@ -123,33 +115,28 @@ func InitKuberInteractive() error {
 	return nil
 }
 
-func CheckInstallMicrok8s() bool {
-	cmd := fmt.Sprintf("dpkg -l | grep -w %s", commandCore)
+func checkInstall(app string) bool {
+	cmd := fmt.Sprintf("dpkg -l | grep -w %s", app)
 	_, err := exec.Command("sh", "-c", cmd).Output()
 	return err == nil
 }
+
+func CheckInstallMicrok8s() bool {
+	return checkInstall(commandCore)
+}
+
 func CheckInstallSnap() bool {
-	cmd := "dpkg -l | grep -w snap"
-	_, err := exec.Command("sh", "-c", cmd).Output()
-	return err == nil
+	return checkInstall("snap")
 }
 
 func InstallSnap() error {
 	update := "sudo apt update"
 	installSnap := "sudo apt install snapd"
-	cmd := exec.Command("sh", "-c", update)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	err := invokeCommandInteractive(update)
 	if err != nil {
 		return fmt.Errorf(err.Error(), errors.New("error update"))
 	}
-	cmd = exec.Command("sh", "-c", installSnap)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err = cmd.Run()
+	err = invokeCommandInteractive(installSnap)
 	if err != nil {
 		return fmt.Errorf(err.Error(), errors.New("error install"))
 	}
