@@ -1,7 +1,6 @@
 package k8sinterface
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -209,12 +208,8 @@ func CheckInstalledOrInstalKuber() error {
 		err = InitKuberInteractive()
 	}
 	if !CheckInGroupMicrok8s() {
-		fmt.Print("Add user to microk8s group? [Y/N]")
-		reader := bufio.NewReader(os.Stdin)
-		char, _, _ := reader.ReadRune()
-		if char == 'Y' || char == 'y' {
-			err = AddGroupMicrok8s()
-		}
+		fmt.Print("Add user to microk8s group.")
+		err = AddGroupMicrok8s()
 	}
 	if err != nil {
 		return err
@@ -223,11 +218,11 @@ func CheckInstalledOrInstalKuber() error {
 }
 
 func Start() error {
-	command := "start" 
+	command := "start"
 	return invokeCommand(commandCore, command)
 }
 
 func Stop() error {
-	command := "stop" 
+	command := "stop"
 	return invokeCommand(commandCore, command)
 }
