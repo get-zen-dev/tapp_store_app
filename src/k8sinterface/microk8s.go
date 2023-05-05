@@ -2,6 +2,7 @@ package k8sinterface
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -83,4 +84,10 @@ func (m *Microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 	result.Name = name
 	result.IsEnabled = isEnabled != -1
 	return &result, nil
+}
+
+func CheckInstallMicrok8s() bool {
+	cmd := fmt.Sprintf("dpkg -l | grep -w %s", commandCore)
+	_, err := exec.Command("bash", "-c", cmd).Output()
+	return err != nil
 }
