@@ -37,11 +37,15 @@ const (
 	MARGIN_RIGHT = 0
 	MARGIN_LEFT  = 0
 
+	MIN_HEIGHT_HELP = 8
+
 	help = `
 move: ←, ↑, →, ↓
 ctrl+s: sort by current column
 alphanumerics: filter column
-enter, spacebar: get column value
+i: install addon
+d: delete addon
+u: update addon
 ctrl+c: quit`
 )
 
@@ -136,6 +140,7 @@ func NewModel(data [][]string) *Model {
 			SetStyle(lipgloss.NewStyle().Bold(true)),
 	)
 	m.infoBox.AddRows([]*flexbox.Row{r1})
+	m.infoBox.SetHeight(MIN_HEIGHT_HELP)
 	return &m
 }
 
@@ -164,9 +169,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+s":
 			x, _ := m.table.GetCursorLocation()
 			m.table.OrderByColumn(x)
-		case "enter", " ":
+		case "i":
 			selectedValue = m.table.GetCursorValue()
 			m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
+		case "d":
+			// selectedValue = m.table.GetCursorValue()
+			// m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
+		case "u":
+			// selectedValue = m.table.GetCursorValue()
+			// m.infoBox.GetRow(0).GetCell(1).SetContent("\nselected cell: " + selectedValue)
 		case "backspace":
 			m.filterWithStr(msg.String())
 		default:
