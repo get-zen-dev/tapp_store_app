@@ -36,6 +36,13 @@ const (
 
 	MARGIN_RIGHT = 0
 	MARGIN_LEFT  = 0
+
+	help = `
+move: ←, ↑, →, ↓
+ctrl+s: sort by current column
+alphanumerics: filter column
+enter, spacebar: get column value
+ctrl+c: quit`
 )
 
 var (
@@ -116,12 +123,7 @@ func NewModel(data [][]string) *Model {
 	m.table.SetRatio(ratio).SetMinWidth(minSize)
 	m.table.AddRows(data)
 
-	infoText := `
-use the arrows to navigate
-ctrl+s: sort by current column
-alphanumerics: filter column
-enter, spacebar: get column value
-ctrl+c: quit`
+	infoText := help
 
 	r1 := m.infoBox.NewRow()
 	r1.AddCells(
