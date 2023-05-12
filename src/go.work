@@ -12,4 +12,5 @@ use (
 	./components/common
 	./components/style
 	./components/listviewport
+	./components/table
 )

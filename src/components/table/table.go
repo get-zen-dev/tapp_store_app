@@ -5,9 +5,10 @@ import (
 
 	"common"
 	"constants"
-	"github.com/charmbracelet/lipgloss"
 	"listviewport"
 	"style"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Column struct {
