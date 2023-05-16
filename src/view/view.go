@@ -15,8 +15,8 @@ import (
 const (
 	COLUMN_KEY_TITLE           = "TITLE"
 	COLUMN_KEY_STATUS          = "STATUS"
-	COLUMN_KEY_CURRENT_VERSION = "CURRENT_VERSION"
-	COLUMN_KEY_LAST_VERSION    = "LAST_VERSION"
+	COLUMN_KEY_CURRENT_VERSION = "CURRENT"
+	COLUMN_KEY_LAST_VERSION    = "LAST"
 
 	COLUMN_INDEX_TITLE           = 0
 	COLUMN_INDEX_STATUS          = 1
@@ -25,18 +25,18 @@ const (
 
 	COLUMN_TITLE_TITLE           = "title"
 	COLUMN_TITLE_STATUS          = "status"
-	COLUMN_TITLE_CURRENT_VERSION = "current version"
-	COLUMN_TITLE_LAST_VERSION    = "last version"
+	COLUMN_TITLE_CURRENT_VERSION = "current"
+	COLUMN_TITLE_LAST_VERSION    = "last"
 
 	COLUMN_FLEX_TITLE           = 6
 	COLUMN_FLEX_STATUS          = 6
 	COLUMN_FLEX_CURRENT_VERSION = 3
 	COLUMN_FLEX_LAST_VERSION    = 3
 
-	COLUMN_MIN_SIZE_TITLE           = 6
-	COLUMN_MIN_SIZE_STATUS          = 6
-	COLUMN_MIN_SIZE_CURRENT_VERSION = 3
-	COLUMN_MIN_SIZE_LAST_VERSION    = 3
+	COLUMN_MIN_SIZE_TITLE           = 8
+	COLUMN_MIN_SIZE_STATUS          = 8
+	COLUMN_MIN_SIZE_CURRENT_VERSION = 10
+	COLUMN_MIN_SIZE_LAST_VERSION    = 10
 
 	MARGIN_RIGHT = 0
 	MARGIN_LEFT  = 0
@@ -104,7 +104,7 @@ func NewModel(data []table.Row) *Model {
 	emptyState := "not found"
 	m := Model{
 		table: table.NewModel(s,
-			constants.Dimensions{Width: COLUMN_MIN_SIZE_TITLE, Height: COLUMN_MIN_SIZE_TITLE},
+			constants.Dimensions{Width: COLUMN_MIN_SIZE_TITLE + 120, Height: COLUMN_MIN_SIZE_TITLE + 12},
 			time.Now(),
 			headers,
 			data,
@@ -122,7 +122,8 @@ func (m Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width + 10, Height: msg.Height - 10})
+		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -130,7 +131,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	}
-	m.table.SyncViewPortContent()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	m.table.NextItem()
+	
 	return m, nil
 }
 
