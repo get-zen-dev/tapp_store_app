@@ -40,7 +40,6 @@ func NewModel(style style.Styles, dimensions constants.Dimensions, lastUpdated t
 func (m Model) View() string {
 	header := m.renderHeader()
 	body := m.renderBody()
-
 	return lipgloss.JoinVertical(lipgloss.Left, header, body)
 }
 
@@ -94,7 +93,7 @@ func (m *Model) SyncViewPortContent() {
 	for i := range m.Rows {
 		renderedRows = append(renderedRows, m.renderRow(i, headerColumns))
 	}
-
+	// panic(renderedRows)
 	m.rowsViewport.SyncViewPort(
 		lipgloss.JoinVertical(lipgloss.Left, renderedRows...),
 	)

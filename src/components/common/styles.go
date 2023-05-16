@@ -8,6 +8,7 @@ import (
 
 var (
 	SearchHeight       = 3
+	HeaderHeight       = 2
 	FooterHeight       = 2
 	ExpandedHelpHeight = 11
 	InputBoxHeight     = 8
