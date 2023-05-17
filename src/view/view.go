@@ -23,10 +23,10 @@ const (
 	COLUMN_INDEX_CURRENT_VERSION = 2
 	COLUMN_INDEX_LAST_VERSION    = 3
 
-	COLUMN_TITLE_TITLE           = "title"
-	COLUMN_TITLE_STATUS          = "status"
-	COLUMN_TITLE_CURRENT_VERSION = "current"
-	COLUMN_TITLE_LAST_VERSION    = "last"
+	COLUMN_TITLE_TITLE           = "Title"
+	COLUMN_TITLE_STATUS          = "Status"
+	COLUMN_TITLE_CURRENT_VERSION = "Current"
+	COLUMN_TITLE_LAST_VERSION    = "Last"
 
 	COLUMN_FLEX_TITLE           = 6
 	COLUMN_FLEX_STATUS          = 6
@@ -46,10 +46,10 @@ const (
 
 var (
 	headers = []table.Column{
-		{Title: COLUMN_KEY_TITLE, Width: COLUMN_MIN_SIZE_TITLE},
-		{Title: COLUMN_KEY_STATUS, Width: COLUMN_MIN_SIZE_STATUS},
-		{Title: COLUMN_KEY_CURRENT_VERSION, Width: COLUMN_MIN_SIZE_CURRENT_VERSION},
-		{Title: COLUMN_KEY_LAST_VERSION, Width: COLUMN_MIN_SIZE_LAST_VERSION},
+		{Title: COLUMN_TITLE_TITLE, Width: COLUMN_MIN_SIZE_TITLE},
+		{Title: COLUMN_TITLE_STATUS, Width: COLUMN_MIN_SIZE_STATUS},
+		{Title: COLUMN_TITLE_CURRENT_VERSION, Width: COLUMN_MIN_SIZE_CURRENT_VERSION},
+		{Title: COLUMN_TITLE_LAST_VERSION, Width: COLUMN_MIN_SIZE_LAST_VERSION},
 	}
 
 	ratio = []int{
@@ -131,18 +131,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	}
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	m.table.NextItem()
-	
+
 	return m, nil
 }
 

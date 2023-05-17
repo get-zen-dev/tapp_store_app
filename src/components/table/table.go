@@ -12,8 +12,10 @@ import (
 )
 
 type Column struct {
-	Title string
-	Width int
+	Title       string
+	Width       int
+	MinWidth    int
+	Coefficient int
 }
 type Row []string
 
@@ -93,7 +95,6 @@ func (m *Model) SyncViewPortContent() {
 	for i := range m.Rows {
 		renderedRows = append(renderedRows, m.renderRow(i, headerColumns))
 	}
-	// panic(renderedRows)
 	m.rowsViewport.SyncViewPort(
 		lipgloss.JoinVertical(lipgloss.Left, renderedRows...),
 	)
@@ -122,6 +123,20 @@ func (m *Model) renderHeaderColumns() []string {
 	shownColumns := m.getShownColumns()
 	renderedColumns := make([]string, len(shownColumns))
 	takenWidth := 0
+
+	//leftoverWidth := m.dimensions.Width - takenWidth
+	//growCellWidth := leftoverWidth / numGrowingColumns
+	//for i, column := range shownColumns {
+	//	if column.Grow == nil || !*column.Grow {
+	//		continue
+	//	}
+	//
+	//	renderedColumns[i] = m.ctx.Styles.Table.TitleCellStyle.Copy().
+	//		Width(growCellWidth).
+	//		MaxWidth(growCellWidth).
+	//		Render(column.Title)
+	//}
+
 	for i, column := range shownColumns {
 		if column.Width != 0 {
 			renderedColumns[i] = m.style.Table.TitleCellStyle.Copy().
