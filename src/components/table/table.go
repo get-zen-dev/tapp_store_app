@@ -122,34 +122,25 @@ func (m *Model) getShownColumns() []Column {
 func (m *Model) renderHeaderColumns() []string {
 	shownColumns := m.getShownColumns()
 	renderedColumns := make([]string, len(shownColumns))
-	takenWidth := 0
-
-	//leftoverWidth := m.dimensions.Width - takenWidth
-	//growCellWidth := leftoverWidth / numGrowingColumns
-	//for i, column := range shownColumns {
-	//	if column.Grow == nil || !*column.Grow {
-	//		continue
-	//	}
-	//
-	//	renderedColumns[i] = m.ctx.Styles.Table.TitleCellStyle.Copy().
-	//		Width(growCellWidth).
-	//		MaxWidth(growCellWidth).
-	//		Render(column.Title)
-	//}
-
+	allFlex := 0
+	for _, column := range shownColumns {
+		allFlex += column.Flex
+	}
+	leftoverWidth := m.dimensions.Width
+	widthFlex := leftoverWidth / allFlex
+	width := 0
 	for i, column := range shownColumns {
-		if column.Width != 0 {
-			renderedColumns[i] = m.style.Table.TitleCellStyle.Copy().
-				Width(column.Width).
-				MaxWidth(column.Width).
-				Render(column.Title)
-			takenWidth += column.Width
-			continue
+		if i != len(renderedColumns)-1 {
+			width = widthFlex * column.Flex
+		} else {
+			width = leftoverWidth
 		}
-
-		cell := m.style.Table.TitleCellStyle.Copy().Render(column.Title)
-		renderedColumns[i] = cell
-		takenWidth += lipgloss.Width(cell)
+		column.Width = width
+		leftoverWidth -= width
+		renderedColumns[i] = m.style.Table.TitleCellStyle.Copy().
+			Width(column.Width).
+			MaxWidth(column.Width).
+			Render(column.Title)
 	}
 	return renderedColumns
 }

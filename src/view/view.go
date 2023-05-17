@@ -28,10 +28,10 @@ const (
 	COLUMN_TITLE_CURRENT_VERSION = "Current"
 	COLUMN_TITLE_LAST_VERSION    = "Last"
 
-	COLUMN_FLEX_TITLE           = 6
-	COLUMN_FLEX_STATUS          = 6
-	COLUMN_FLEX_CURRENT_VERSION = 3
-	COLUMN_FLEX_LAST_VERSION    = 3
+	COLUMN_FLEX_TITLE           = 3
+	COLUMN_FLEX_STATUS          = 3
+	COLUMN_FLEX_CURRENT_VERSION = 1
+	COLUMN_FLEX_LAST_VERSION    = 2
 
 	COLUMN_MIN_SIZE_TITLE           = 8
 	COLUMN_MIN_SIZE_STATUS          = 8
@@ -104,7 +104,7 @@ func NewModel(data []table.Row) *Model {
 	emptyState := "not found"
 	m := Model{
 		table: table.NewModel(s,
-			constants.Dimensions{Width: COLUMN_MIN_SIZE_TITLE + 120, Height: COLUMN_MIN_SIZE_TITLE + 12},
+			constants.Dimensions{Width: 0, Height: 0},
 			time.Now(),
 			headers,
 			data,
@@ -122,7 +122,7 @@ func (m Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width + 10, Height: msg.Height})
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch msg.String() {
