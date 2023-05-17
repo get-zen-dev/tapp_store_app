@@ -12,10 +12,10 @@ import (
 )
 
 type Column struct {
-	Title       string
-	Width       int
-	MinWidth    int
-	Coefficient int
+	Title    string
+	Width    int
+	MinWidth int
+	Flex     int
 }
 type Row []string
 

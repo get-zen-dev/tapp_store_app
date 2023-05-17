@@ -46,10 +46,10 @@ const (
 
 var (
 	headers = []table.Column{
-		{Title: COLUMN_TITLE_TITLE, Width: COLUMN_MIN_SIZE_TITLE},
-		{Title: COLUMN_TITLE_STATUS, Width: COLUMN_MIN_SIZE_STATUS},
-		{Title: COLUMN_TITLE_CURRENT_VERSION, Width: COLUMN_MIN_SIZE_CURRENT_VERSION},
-		{Title: COLUMN_TITLE_LAST_VERSION, Width: COLUMN_MIN_SIZE_LAST_VERSION},
+		{Title: COLUMN_TITLE_TITLE, Width: COLUMN_MIN_SIZE_TITLE, MinWidth: COLUMN_MIN_SIZE_TITLE, Flex: COLUMN_FLEX_TITLE},
+		{Title: COLUMN_TITLE_STATUS, Width: COLUMN_MIN_SIZE_STATUS, MinWidth: COLUMN_MIN_SIZE_STATUS, Flex: COLUMN_FLEX_STATUS},
+		{Title: COLUMN_TITLE_CURRENT_VERSION, Width: COLUMN_MIN_SIZE_CURRENT_VERSION, MinWidth: COLUMN_MIN_SIZE_CURRENT_VERSION, Flex: COLUMN_FLEX_LAST_VERSION},
+		{Title: COLUMN_TITLE_LAST_VERSION, Width: COLUMN_MIN_SIZE_LAST_VERSION, MinWidth: COLUMN_MIN_SIZE_LAST_VERSION, Flex: COLUMN_FLEX_LAST_VERSION},
 	}
 
 	ratio = []int{
@@ -122,7 +122,7 @@ func (m Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width + 10, Height: msg.Height - 10})
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width + 10, Height: msg.Height})
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch msg.String() {

@@ -106,7 +106,7 @@ func (m *Model) LastItem() int {
 }
 
 func (m *Model) SetDimensions(dimensions constants.Dimensions) {
-	m.viewport.Height = dimensions.Height - common.ListPagerHeight
+	m.viewport.Height = dimensions.Height - common.ListPagerHeight - common.HeaderHeight
 	m.viewport.Width = dimensions.Width
 }
 
