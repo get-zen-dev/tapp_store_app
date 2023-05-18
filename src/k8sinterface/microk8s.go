@@ -91,15 +91,18 @@ func (m *microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 func kuberInitialization() error {
 	err := invokeCommand("snap", "install", "microk8s", "--classic")
 	if err != nil {
-		return err
+		if !checkInstallMicrok8s() {
+			return errors.Join(errors.New("incorrect microk8s install"), err)
+		}
 	}
 
 	addons := []string{"dns", "community", "traefik"}
 
 	for i := range addons {
-		err = invokeCommand(commandCore, "enable", addons[i])
+		addon := addons[i]
+		err = invokeCommand(commandCore, "enable", addon)
 		if err != nil {
-			return err
+			return errors.Join(errors.New("incorrect install of microk8s addon - "+addon), err)
 		}
 	}
 
