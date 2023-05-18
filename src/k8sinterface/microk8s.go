@@ -58,7 +58,7 @@ func (m *microk8sClient) RemoveModule(name string) error {
 }
 
 func (m *microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
-	cmd := exec.Command(commandCore, "status", name)
+	cmd := exec.Command(commandCore, "status")
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -66,13 +66,12 @@ func (m *microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 	}
 
 	status := string(stdout)
-	println("Debug status: ", status)
 	_, enableAndDisable, find := strings.Cut(status, "  enabled:")
-	if find {
+	if !find {
 		return nil, errors.New("enable modules not found")
 	}
 	enable, disable, find := strings.Cut(enableAndDisable, "  disabled:")
-	if find {
+	if !find {
 		return nil, errors.New("disabled modules not found")
 	}
 
