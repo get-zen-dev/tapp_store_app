@@ -95,6 +95,7 @@ func (m *Model) SyncViewPortContent() {
 	for i := range m.Rows {
 		renderedRows = append(renderedRows, m.renderRow(i, headerColumns))
 	}
+
 	m.rowsViewport.SyncViewPort(
 		lipgloss.JoinVertical(lipgloss.Left, renderedRows...),
 	)

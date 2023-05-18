@@ -31,7 +31,7 @@ func NewModel(style style.Styles, dimensions constants.Dimensions, lastUpdated t
 		currId:          0,
 		viewport: viewport.Model{
 			Width:  dimensions.Width,
-			Height: dimensions.Height - common.ListPagerHeight,
+			Height: dimensions.Height - common.ListPagerHeight - common.HeaderHeight,
 		},
 		topBoundId:    0,
 		ItemTypeLabel: itemTypeLabel,
