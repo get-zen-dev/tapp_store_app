@@ -14,10 +14,9 @@ import (
 )
 
 func main() {
-	k8.CheckInstalledOrInstalKuber()
-	v8 := k8.Microk8sClient{}
-	v8.InitKuber()
-	k8.Start()
+	v8 := k8.GetInterfaceProvider()
+	v8.Start()
+
 	env.SetUpEnv()
 	list, err := requests.GetListAddons()
 	if err != nil {
@@ -37,5 +36,5 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	k8.Stop()
+	v8.Stop()
 }

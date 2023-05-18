@@ -69,7 +69,7 @@ var (
 		COLUMN_MIN_SIZE_LAST_VERSION,
 	}
 
-	clientMicrok8s = k8.Microk8sClient{}
+	clientMicrok8s = k8.GetInterfaceProvider()
 
 	selectedValue = "\nselect something with spacebar or enter"
 )
