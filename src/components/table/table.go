@@ -173,8 +173,7 @@ func (m *Model) renderRow(rowId int, headerColumns []string) string {
 	var style lipgloss.Style
 
 	if m.rowsViewport.GetCurrItem() == rowId {
-		//style = m.style.Table.SelectedCellStyle.Foreground(lipgloss.AdaptiveColor{Light: "047", Dark: "015"})
-		style = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#04d9ff", Dark: "015"})
+		style = m.style.Table.SelectedCellStyle
 	} else {
 		style = m.style.Table.CellStyle
 	}
