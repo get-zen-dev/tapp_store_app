@@ -18,9 +18,10 @@ type Theme struct {
 }
 
 var DefaultTheme = &Theme{
-	PrimaryBorder:      lipgloss.AdaptiveColor{Light: "013", Dark: "008"},
-	SecondaryBorder:    lipgloss.AdaptiveColor{Light: "008", Dark: "007"},
-	SelectedBackground: lipgloss.AdaptiveColor{Light: "006", Dark: "008"},
+	PrimaryBorder:   lipgloss.AdaptiveColor{Light: "013", Dark: "008"},
+	SecondaryBorder: lipgloss.AdaptiveColor{Light: "008", Dark: "007"},
+	//SelectedBackground: lipgloss.AdaptiveColor{Light: "006", Dark: "008"},
+	SelectedBackground: lipgloss.AdaptiveColor{Light: "#04d9ff", Dark: "015"},
 	FaintBorder:        lipgloss.AdaptiveColor{Light: "254", Dark: "000"},
 	PrimaryText:        lipgloss.AdaptiveColor{Light: "000", Dark: "015"},
 	SecondaryText:      lipgloss.AdaptiveColor{Light: "244", Dark: "251"},

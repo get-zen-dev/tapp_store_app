@@ -2,6 +2,7 @@ package view
 
 import (
 	"constants"
+	"github.com/charmbracelet/lipgloss"
 	"style"
 	"table"
 	"theme"
@@ -122,7 +123,7 @@ func (m Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width - 100, Height: msg.Height})
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -141,5 +142,5 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	return m.table.View()
+	return lipgloss.JoinHorizontal(lipgloss.Left, m.table.View(), "asdasd")
 }

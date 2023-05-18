@@ -86,7 +86,7 @@ func InitStyles(theme theme.Theme) Styles {
 		BorderForeground(theme.FaintBorder).
 		BorderBottom(true)
 	s.Table.RowStyle = lipgloss.NewStyle().
-		BorderStyle(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.HiddenBorder()).
 		BorderForeground(theme.FaintBorder).
 		BorderBottom(true)
 
