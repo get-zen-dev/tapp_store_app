@@ -2,6 +2,7 @@ package listviewport
 
 import (
 	"fmt"
+	"math"
 	"style"
 	"time"
 
@@ -55,7 +56,7 @@ func (m *Model) SyncViewPort(content string) {
 }
 
 func (m *Model) getNumPrsPerPage() int {
-	return m.viewport.Height / m.ListItemHeight
+	return int(math.Round(float64(float32(m.viewport.Height) / float32(m.ListItemHeight))))
 }
 
 func (m *Model) ResetCurrItem() {
@@ -68,20 +69,21 @@ func (m *Model) GetCurrItem() int {
 }
 
 func (m *Model) NextItem() int {
-	atBottomOfViewport := m.currId >= m.bottomBoundId
-	if atBottomOfViewport {
-		m.topBoundId += 1
-		m.bottomBoundId += 1
-		m.viewport.LineDown(m.ListItemHeight)
-	}
-
 	newId := Min(m.currId+1, m.NumCurrentItems-1)
 	newId = Max(newId, 0)
 	m.currId = newId
+
+	atBottomOfViewport := m.currId >= m.topBoundId+m.getNumPrsPerPage()
+	if atBottomOfViewport {
+		m.topBoundId += 1
+		m.viewport.LineDown(m.ListItemHeight)
+	}
 	return m.currId
 }
 
 func (m *Model) PrevItem() int {
+	m.currId = Max(m.currId-1, 0)
+
 	atTopOfViewport := m.currId < m.topBoundId
 	if atTopOfViewport {
 		m.topBoundId -= 1
@@ -89,7 +91,6 @@ func (m *Model) PrevItem() int {
 		m.viewport.LineUp(m.ListItemHeight)
 	}
 
-	m.currId = Max(m.currId-1, 0)
 	return m.currId
 }
 
@@ -108,6 +109,7 @@ func (m *Model) LastItem() int {
 func (m *Model) SetDimensions(dimensions constants.Dimensions) {
 	m.viewport.Height = dimensions.Height - common.ListPagerHeight - common.HeaderHeight
 	m.viewport.Width = dimensions.Width
+	m.viewport.SetYOffset(m.currId*m.ListItemHeight - m.getNumPrsPerPage())
 }
 
 func (m *Model) View() string {
