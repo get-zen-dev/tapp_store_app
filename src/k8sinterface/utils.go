@@ -1,10 +1,21 @@
 package k8sinterface
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
 )
+
+func setupRepositoryOfAddons() error {
+	repositoryName := "get-zen"
+	repositoryLink := "https://github.com/get-zen-dev/tapp_store_rep"
+	err := invokeCommand(commandCore, "addons repo add", repositoryName, repositoryLink)
+	if err != nil {
+		return errors.Join(errors.New("can't initialize link with addons repository"), err)
+	}
+	return nil
+}
 
 func checkIsRootGranted() bool {
 	cmd := "id"
@@ -25,7 +36,7 @@ func checkInstall(app string) bool {
 }
 
 func checkInstallMicrok8s() bool {
-	err := invokeCommand("microk8s", "version")
+	err := invokeCommand(commandCore, "version")
 	return err == nil
 }
 

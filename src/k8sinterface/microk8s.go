@@ -93,5 +93,5 @@ func kuberInitialization() error {
 		}
 	}
 
-	return nil
+	return setupRepositoryOfAddons()
 }
