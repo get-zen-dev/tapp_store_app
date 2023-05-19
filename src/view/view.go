@@ -181,6 +181,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	} else {
 		switch msg := msg.(type) {
 		case tea.WindowSizeMsg:
+			m.help.Width = msg.Width
 			m.question.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
 		case tea.KeyMsg:
 			switch {
