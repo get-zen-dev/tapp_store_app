@@ -2,6 +2,8 @@ package view
 
 import (
 	"constants"
+	"environment"
+	"shortQuestion"
 	"style"
 	"table"
 	"theme"
@@ -13,50 +15,38 @@ import (
 )
 
 const (
-	COLUMN_KEY_TITLE           = "TITLE"
-	COLUMN_KEY_STATUS          = "STATUS"
-	COLUMN_KEY_CURRENT_VERSION = "CURRENT"
-	COLUMN_KEY_LAST_VERSION    = "LAST"
+	ColumnTitleTitle          = "Title"
+	ColumnTitleStatus         = "Status"
+	ColumnTitleCurrentVersion = "Current"
+	ColumnTitleLastVersion    = "Last"
 
-	COLUMN_INDEX_TITLE           = 0
-	COLUMN_INDEX_STATUS          = 1
-	COLUMN_INDEX_CURRENT_VERSION = 2
-	COLUMN_INDEX_LAST_VERSION    = 3
+	ColumnFlexTitle          = 3
+	ColumnFlexStatus         = 3
+	ColumnFlexCurrentVersion = 1
+	ColumnFlexLastVersion    = 2
 
-	COLUMN_TITLE_TITLE           = "Title"
-	COLUMN_TITLE_STATUS          = "Status"
-	COLUMN_TITLE_CURRENT_VERSION = "Current"
-	COLUMN_TITLE_LAST_VERSION    = "Last"
+	ColumnMinSizeTitle          = 8
+	ColumnMinSizeStatus         = 8
+	ColumnMinSizeCurrentVersion = 10
+	ColumnMinSizeLastVersion    = 10
 
-	COLUMN_FLEX_TITLE           = 3
-	COLUMN_FLEX_STATUS          = 3
-	COLUMN_FLEX_CURRENT_VERSION = 1
-	COLUMN_FLEX_LAST_VERSION    = 2
-
-	COLUMN_MIN_SIZE_TITLE           = 8
-	COLUMN_MIN_SIZE_STATUS          = 8
-	COLUMN_MIN_SIZE_CURRENT_VERSION = 10
-	COLUMN_MIN_SIZE_LAST_VERSION    = 10
-
-	MIN_WIDTH  = 50
-	MIN_HEIGHT = 10
-
-	MIN_HEIGHT_HELP = 6
+	MinWidth  = 50
+	MinHeight = 10
 )
 
 var (
 	headers = []table.Column{
-		{Title: COLUMN_TITLE_TITLE, Width: COLUMN_MIN_SIZE_TITLE, MinWidth: COLUMN_MIN_SIZE_TITLE, Flex: COLUMN_FLEX_TITLE},
-		{Title: COLUMN_TITLE_STATUS, Width: COLUMN_MIN_SIZE_STATUS, MinWidth: COLUMN_MIN_SIZE_STATUS, Flex: COLUMN_FLEX_STATUS},
-		{Title: COLUMN_TITLE_CURRENT_VERSION, Width: COLUMN_MIN_SIZE_CURRENT_VERSION, MinWidth: COLUMN_MIN_SIZE_CURRENT_VERSION, Flex: COLUMN_FLEX_LAST_VERSION},
-		{Title: COLUMN_TITLE_LAST_VERSION, Width: COLUMN_MIN_SIZE_LAST_VERSION, MinWidth: COLUMN_MIN_SIZE_LAST_VERSION, Flex: COLUMN_FLEX_LAST_VERSION},
+		{Title: ColumnTitleTitle, Width: ColumnMinSizeTitle, MinWidth: ColumnMinSizeTitle, Flex: ColumnFlexTitle},
+		{Title: ColumnTitleStatus, Width: ColumnMinSizeStatus, MinWidth: ColumnMinSizeStatus, Flex: ColumnFlexStatus},
+		{Title: ColumnTitleCurrentVersion, Width: ColumnMinSizeCurrentVersion, MinWidth: ColumnMinSizeCurrentVersion, Flex: ColumnFlexLastVersion},
+		{Title: ColumnTitleLastVersion, Width: ColumnMinSizeLastVersion, MinWidth: ColumnMinSizeLastVersion, Flex: ColumnFlexLastVersion},
 	}
 
 	ratio = []int{
-		COLUMN_FLEX_TITLE,
-		COLUMN_FLEX_STATUS,
-		COLUMN_FLEX_CURRENT_VERSION,
-		COLUMN_FLEX_LAST_VERSION,
+		ColumnFlexTitle,
+		ColumnFlexStatus,
+		ColumnFlexCurrentVersion,
+		ColumnFlexLastVersion,
 	}
 
 	clientMicrok8s = k8.Microk8sClient{}
@@ -95,8 +85,9 @@ func (i *Items) GetItems() []table.Row {
 }
 
 type Model struct {
-	table table.Model
-	style *style.Styles
+	table    table.Model
+	style    *style.Styles
+	question shortQuestion.Question
 }
 
 func NewModel(data []table.Row) *Model {
@@ -104,13 +95,18 @@ func NewModel(data []table.Row) *Model {
 	emptyState := "not found"
 	m := Model{
 		table: table.NewModel(s,
-			constants.Dimensions{Width: MIN_WIDTH, Height: MIN_HEIGHT},
+			constants.Dimensions{Width: MinWidth, Height: MinHeight},
 			time.Now(),
 			headers,
 			data,
 			"addons",
 			&emptyState),
-		style: &s,
+		style:    &s,
+		question: shortQuestion.NewQuestionConcrete(),
+	}
+	_, err := environment.ReadFromConfig("domen")
+	if err == nil {
+		m.question.SetAnswered(true)
 	}
 	return &m
 }
@@ -120,26 +116,46 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
-		m.table.SyncViewPortContent()
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "up", "k":
-			m.table.PrevItem()
-		case "down", "j":
-			m.table.NextItem()
+	if m.question.Answered() {
+		switch msg := msg.(type) {
+		case tea.WindowSizeMsg:
+			m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
+			m.table.SyncViewPortContent()
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "ctrl+c", "q":
+				return m, tea.Quit
+			case "up", "k":
+				m.table.PrevItem()
+			case "down", "j":
+				m.table.NextItem()
+			}
 		}
-
 		return m, nil
+	} else {
+		switch msg := msg.(type) {
+		case tea.WindowSizeMsg:
+			m.question.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "ctrl+c":
+				return m, tea.Quit
+			case "enter":
+				domen := m.question.Input().Value()
+				environment.WriteInConfig("domen", domen)
+				m.question.SetAnswered(true)
+				m.table.SetDimensions(m.question.GetDimensions())
+				m.table.SyncViewPortContent()
+				return m, m.question.Input().Blur
+			}
+		}
+		return m, m.question.Update(msg)
 	}
-
-	return m, nil
 }
 
 func (m *Model) View() string {
-	return m.table.View()
+	if m.question.Answered() {
+		return m.table.View()
+	}
+	return m.question.View()
 }
