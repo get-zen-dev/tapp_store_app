@@ -20,22 +20,23 @@ type Column struct {
 type Row []string
 
 type Model struct {
-	style        style.Styles
-	Columns      []Column
-	Rows         []Row
-	EmptyState   *string
-	dimensions   constants.Dimensions
-	rowsViewport listviewport.Model
+	style         style.Styles
+	Columns       []Column
+	Rows          []Row
+	EmptyState    *string
+	dimensions    constants.Dimensions
+	minDimensions constants.Dimensions
+	rowsViewport  listviewport.Model
 }
 
 func NewModel(style style.Styles, dimensions constants.Dimensions, lastUpdated time.Time, columns []Column, rows []Row, itemTypeLabel string, emptyState *string) Model {
 	return Model{
-		style:        style,
-		Columns:      columns,
-		Rows:         rows,
-		EmptyState:   emptyState,
-		dimensions:   dimensions,
-		rowsViewport: listviewport.NewModel(style, dimensions, lastUpdated, itemTypeLabel, len(rows), 2),
+		style:         style,
+		Columns:       columns,
+		Rows:          rows,
+		EmptyState:    emptyState,
+		minDimensions: dimensions,
+		rowsViewport:  listviewport.NewModel(style, dimensions, lastUpdated, itemTypeLabel, len(rows), 2),
 	}
 }
 
@@ -46,7 +47,8 @@ func (m Model) View() string {
 }
 
 func (m *Model) SetDimensions(dimensions constants.Dimensions) {
-	m.dimensions = dimensions
+	m.dimensions = constants.Dimensions{listviewport.Max(m.minDimensions.Width, dimensions.Width),
+		listviewport.Max(m.minDimensions.Height, dimensions.Height)}
 	m.rowsViewport.SetDimensions(constants.Dimensions{
 		Width:  m.dimensions.Width,
 		Height: m.dimensions.Height,

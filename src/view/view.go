@@ -38,8 +38,8 @@ const (
 	COLUMN_MIN_SIZE_CURRENT_VERSION = 10
 	COLUMN_MIN_SIZE_LAST_VERSION    = 10
 
-	MARGIN_RIGHT = 0
-	MARGIN_LEFT  = 0
+	MIN_WIDTH  = 50
+	MIN_HEIGHT = 10
 
 	MIN_HEIGHT_HELP = 6
 )
@@ -104,7 +104,7 @@ func NewModel(data []table.Row) *Model {
 	emptyState := "not found"
 	m := Model{
 		table: table.NewModel(s,
-			constants.Dimensions{Width: 0, Height: 0},
+			constants.Dimensions{Width: MIN_WIDTH, Height: MIN_HEIGHT},
 			time.Now(),
 			headers,
 			data,
