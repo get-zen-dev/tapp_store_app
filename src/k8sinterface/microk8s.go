@@ -9,21 +9,15 @@ import (
 const commandCore = "microk8s"
 
 type microk8sClient struct {
+	domainName string
 }
 
 func (m *microk8sClient) Start() error {
-	err := kuberInitialization()
-	if err != nil {
-		return err
+	if !checkInstallMicrok8s() {
+		return kuberInitialization()
 	}
 
-	command := "start"
-	err = invokeCommand(commandCore, command)
-	if err != nil {
-		return err
-	}
-
-	return invokeCommand(commandCore, "status", "--wait-ready")
+	return invokeCommand(commandCore, "start")
 }
 
 func (m *microk8sClient) Stop() error {
@@ -81,9 +75,12 @@ func (m *microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 func kuberInitialization() error {
 	err := invokeCommand("snap", "install", "microk8s", "--classic")
 	if err != nil {
-		if !checkInstallMicrok8s() {
-			return errors.Join(errors.New("incorrect microk8s install"), err)
-		}
+		return errors.Join(errors.New("incorrect microk8s install"), err)
+	}
+
+	err = invokeCommand(commandCore, "start")
+	if err != nil {
+		return errors.Join(errors.New("error on microk8s starting"), err)
 	}
 
 	addons := []string{"dns", "community", "traefik"}
