@@ -24,12 +24,12 @@ func main() {
 	if err != nil {
 		printErr(err)
 	}
-	/*	defer func(clientMicrok8s k8.KuberInterface) {
+	defer func(clientMicrok8s k8.KuberInterface) {
 		err := clientMicrok8s.Stop()
 		if err != nil {
 			printErr(err)
 		}
-	}(clientMicrok8s)*/
+	}(clientMicrok8s)
 	m, err := view.NewModel()
 	if err != nil {
 		printErr(err)
