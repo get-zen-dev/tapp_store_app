@@ -10,7 +10,7 @@ import (
 func setupRepositoryOfAddons() error {
 	repositoryName := "get-zen"
 	repositoryLink := "https://github.com/get-zen-dev/tapp_store_rep"
-	err := invokeCommand(commandCore, "addons repo add", repositoryName, repositoryLink)
+	err := invokeCommand(commandCore, "addons", "repo", "add", repositoryName, repositoryLink)
 	if err != nil {
 		return errors.Join(errors.New("can't initialize link with addons repository"), err)
 	}

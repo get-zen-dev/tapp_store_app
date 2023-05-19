@@ -14,7 +14,10 @@ type microk8sClient struct {
 
 func (m *microk8sClient) Start() error {
 	if !checkInstallMicrok8s() {
-		return kuberInitialization()
+		err := kuberInitialization()
+		if err != nil {
+			return err
+		}
 	}
 
 	return invokeCommand(commandCore, "start")
