@@ -84,7 +84,6 @@ type Model struct {
 }
 
 func NewModel() (*Model, error) {
-	env.SetUpEnv()
 	list, err := requests.GetListAddons()
 	if err != nil {
 		return nil, err

@@ -6,23 +6,11 @@ import (
 )
 
 var (
-	owner      string
-	repository string
-	path       string
-	ref        string
+	owner      = "canonical"
+	repository = "microk8s-core-addons"
+	path       = "addons"
+	ref        = "main"
 )
-
-func SetUpEnv() {
-	viper.SetConfigFile("./../configs/app.env")
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Println(err)
-	}
-	owner = viper.Get("owner").(string)
-	repository = viper.Get("repository").(string)
-	path = viper.Get("path").(string)
-	ref = viper.Get("ref").(string)
-}
 
 // Returns the name of owner of the repository with addons
 func GetOwner() string {
