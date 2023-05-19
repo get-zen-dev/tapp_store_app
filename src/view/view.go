@@ -3,6 +3,8 @@ package view
 import (
 	"constants"
 	env "environment"
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/lipgloss"
 	k8 "k8sinterface"
 	"requests"
 	"shortQuestion"
@@ -10,6 +12,7 @@ import (
 	"table"
 	"theme"
 
+	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -74,6 +77,7 @@ type Model struct {
 	table    table.Model
 	style    *style.Styles
 	question shortQuestion.Question
+	help     help.Model
 }
 
 func NewModel() (*Model, error) {
@@ -112,6 +116,7 @@ func NewModel() (*Model, error) {
 			&emptyState),
 		style:    &s,
 		question: shortQuestion.NewQuestionConcrete(),
+		help:     help.New(),
 	}
 	_, err = env.ReadFromConfig("domen")
 	if err == nil {
@@ -128,15 +133,16 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.question.Answered() {
 		switch msg := msg.(type) {
 		case tea.WindowSizeMsg:
-			m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
+			m.help.Width = msg.Width
+			m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort})
 			m.table.SyncViewPortContent()
 		case tea.KeyMsg:
-			switch msg.String() {
-			case "ctrl+c", "q":
+			switch {
+			case key.Matches(msg, constants.Keys.Quit):
 				return m, tea.Quit
-			case "up", "k":
+			case key.Matches(msg, constants.Keys.Up):
 				m.table.PrevItem()
-			case "down", "j":
+			case key.Matches(msg, constants.Keys.Down):
 				m.table.NextItem()
 			}
 		}
@@ -146,10 +152,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.WindowSizeMsg:
 			m.question.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
 		case tea.KeyMsg:
-			switch msg.String() {
-			case "ctrl+c":
+			switch {
+			case key.Matches(msg, constants.Keys.QuitWithoutQ):
 				return m, tea.Quit
-			case "enter":
+			case key.Matches(msg, constants.Keys.Enter):
 				domen := m.question.Input().Value()
 				env.WriteInConfig("domen", domen)
 				m.question.SetAnswered(true)
@@ -164,7 +170,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) View() string {
 	if m.question.Answered() {
-		return m.table.View()
+		return lipgloss.JoinVertical(lipgloss.Left,
+			m.table.View(), m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)))
 	}
 	return m.question.View()
 }
