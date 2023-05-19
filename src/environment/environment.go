@@ -2,7 +2,6 @@ package environment
 
 import (
 	"fmt"
-
 	"github.com/spf13/viper"
 )
 
@@ -43,4 +42,33 @@ func GetPath() string {
 // Returns the ref in the repository
 func GetRef() string {
 	return ref
+}
+
+func WriteInConfig(key, value string) error {
+	viper.SetConfigFile("./../configs/app.env")
+	err := viper.ReadInConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
+	viper.Set(key, value)
+	err = viper.WriteConfig()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReadFromConfig(key string) (string, error) {
+	viper.SetConfigFile("./../configs/app.env")
+	err := viper.ReadInConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
+	data := viper.Get(key)
+	switch data.(type) {
+	case string:
+		return data.(string), nil
+	default:
+		return "", fmt.Errorf("domen not found")
+	}
 }
