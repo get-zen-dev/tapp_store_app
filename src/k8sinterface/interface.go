@@ -1,5 +1,7 @@
 package k8sinterface
 
+import "errors"
+
 type ModuleInfo struct {
 	Name      string
 	IsEnabled bool
@@ -17,6 +19,10 @@ type KuberInterface interface {
 	//UpdateModule(name string) ModuleInfo
 }
 
-func GetInterfaceProvider() KuberInterface {
-	return &microk8sClient{}
+func GetInterfaceProvider(domain string) (KuberInterface, error) {
+	if !checkIsRootGranted() {
+		return nil, errors.New("cannot user interface without root privileges")
+	}
+
+	return &microk8sClient{domain}, nil
 }

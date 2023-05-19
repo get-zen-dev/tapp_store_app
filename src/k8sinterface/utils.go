@@ -3,7 +3,14 @@ package k8sinterface
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
+
+func checkIsRootGranted() bool {
+	cmd := "id"
+	out, _ := exec.Command("sh", "-c", cmd).Output()
+	return strings.Contains(string(out), "uid=0")
+}
 
 func invokeCommand(command string, args ...string) error {
 	cmd := exec.Command(command, args...)
