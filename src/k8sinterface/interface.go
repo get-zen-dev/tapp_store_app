@@ -8,10 +8,15 @@ type ModuleInfo struct {
 }
 
 type KuberInterface interface {
-	InitKuber() error
+	Start() error
+	Stop() error
 
 	InstallModule(name string) (*ModuleInfo, error)
 	RemoveModule(name string) error
 	GetModuleInfo(name string) (*ModuleInfo, error)
 	//UpdateModule(name string) ModuleInfo
+}
+
+func GetInterfaceProvider() KuberInterface {
+	return &microk8sClient{}
 }

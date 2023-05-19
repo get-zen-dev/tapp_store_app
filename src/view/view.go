@@ -49,7 +49,7 @@ var (
 		ColumnFlexLastVersion,
 	}
 
-	clientMicrok8s = k8.Microk8sClient{}
+	clientMicrok8s = k8.GetInterfaceProvider()
 )
 
 type Item struct {
