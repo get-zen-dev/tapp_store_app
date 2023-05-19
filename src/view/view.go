@@ -15,20 +15,17 @@ import (
 )
 
 const (
-	ColumnTitleTitle          = "Title"
-	ColumnTitleStatus         = "Status"
-	ColumnTitleCurrentVersion = "Current"
-	ColumnTitleLastVersion    = "Last"
+	ColumnTitleTitle       = "Title"
+	ColumnTitleStatus      = "Status"
+	ColumnTitleDescription = "Description"
 
-	ColumnFlexTitle          = 3
-	ColumnFlexStatus         = 3
-	ColumnFlexCurrentVersion = 1
-	ColumnFlexLastVersion    = 2
+	ColumnFlexTitle       = 3
+	ColumnFlexStatus      = 3
+	ColumnFlexDescription = 3
 
-	ColumnMinSizeTitle          = 8
-	ColumnMinSizeStatus         = 8
-	ColumnMinSizeCurrentVersion = 10
-	ColumnMinSizeLastVersion    = 10
+	ColumnMinSizeTitle       = 8
+	ColumnMinSizeStatus      = 8
+	ColumnMinSizeDescription = 10
 
 	MinWidth  = 50
 	MinHeight = 10
@@ -38,25 +35,16 @@ var (
 	headers = []table.Column{
 		{Title: ColumnTitleTitle, Width: ColumnMinSizeTitle, MinWidth: ColumnMinSizeTitle, Flex: ColumnFlexTitle},
 		{Title: ColumnTitleStatus, Width: ColumnMinSizeStatus, MinWidth: ColumnMinSizeStatus, Flex: ColumnFlexStatus},
-		{Title: ColumnTitleCurrentVersion, Width: ColumnMinSizeCurrentVersion, MinWidth: ColumnMinSizeCurrentVersion, Flex: ColumnFlexLastVersion},
-		{Title: ColumnTitleLastVersion, Width: ColumnMinSizeLastVersion, MinWidth: ColumnMinSizeLastVersion, Flex: ColumnFlexLastVersion},
-	}
-
-	ratio = []int{
-		ColumnFlexTitle,
-		ColumnFlexStatus,
-		ColumnFlexCurrentVersion,
-		ColumnFlexLastVersion,
+		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
 	clientMicrok8s = k8.GetInterfaceProvider()
 )
 
 type Item struct {
-	Title          string
-	Status         string
-	CurrentVersion string
-	LastVersion    string
+	Title       string
+	Status      string
+	Description string
 }
 
 type Items struct {
@@ -75,8 +63,7 @@ func makeRow(item *Item) []string {
 	return []string{
 		item.Title,
 		item.Status,
-		item.CurrentVersion,
-		item.LastVersion,
+		item.Description,
 	}
 }
 
