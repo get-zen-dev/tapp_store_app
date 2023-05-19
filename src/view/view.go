@@ -31,6 +31,9 @@ const (
 
 	MinWidth  = 50
 	MinHeight = 10
+
+	Installed = "✓"
+	Deleted   = "✗"
 )
 
 var (
@@ -97,9 +100,9 @@ func NewModel() (*Model, error) {
 		}
 		status := ""
 		if info.IsEnabled {
-			status = "✓"
+			status = Installed
 		} else {
-			status = "✗"
+			status = Deleted
 		}
 		items.Append(&Item{
 			Title:       v.Name,
@@ -129,12 +132,26 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+type Install struct {
+	index int
+}
+
+type Delete struct {
+	index int
+}
+
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.question.Answered() {
 		switch msg := msg.(type) {
 		case tea.WindowSizeMsg:
 			m.help.Width = msg.Width
 			m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort})
+			m.table.SyncViewPortContent()
+		case Install:
+			m.table.Rows[msg.index][1] = Installed
+			m.table.SyncViewPortContent()
+		case Delete:
+			m.table.Rows[msg.index][1] = Deleted
 			m.table.SyncViewPortContent()
 		case tea.KeyMsg:
 			switch {
@@ -144,6 +161,20 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.table.PrevItem()
 			case key.Matches(msg, constants.Keys.Down):
 				m.table.NextItem()
+			case key.Matches(msg, constants.Keys.Install):
+				index := m.table.GetCurrItem()
+				name := m.table.Rows[index][0]
+				return m, func() tea.Msg {
+					clientMicrok8s.InstallModule(name)
+					return Install{index}
+				}
+			case key.Matches(msg, constants.Keys.Delete):
+				index := m.table.GetCurrItem()
+				name := m.table.Rows[index][0]
+				return m, func() tea.Msg {
+					clientMicrok8s.RemoveModule(name)
+					return Delete{index}
+				}
 			}
 		}
 		return m, nil
