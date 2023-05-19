@@ -1,15 +1,13 @@
 package listviewport
 
 import (
-	"fmt"
-	"math"
-	"style"
-	"time"
-
 	"common"
 	"constants"
+	"fmt"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
+	"math"
+	"style"
 )
 
 type Model struct {
@@ -21,11 +19,9 @@ type Model struct {
 	ListItemHeight  int
 	NumCurrentItems int
 	NumTotalItems   int
-	LastUpdated     time.Time
-	ItemTypeLabel   string
 }
 
-func NewModel(style style.Styles, dimensions constants.Dimensions, lastUpdated time.Time, itemTypeLabel string, numItems, listItemHeight int) Model {
+func NewModel(style style.Styles, dimensions constants.Dimensions, numItems, listItemHeight int) Model {
 	model := Model{
 		NumCurrentItems: numItems,
 		ListItemHeight:  listItemHeight,
@@ -34,9 +30,7 @@ func NewModel(style style.Styles, dimensions constants.Dimensions, lastUpdated t
 			Width:  dimensions.Width,
 			Height: dimensions.Height - common.ListPagerHeight - common.HeaderHeight,
 		},
-		topBoundId:    0,
-		ItemTypeLabel: itemTypeLabel,
-		LastUpdated:   lastUpdated,
+		topBoundId: 0,
 	}
 	model.bottomBoundId = Min(model.NumCurrentItems-1, model.getNumPrsPerPage()-1)
 	return model
@@ -116,13 +110,9 @@ func (m *Model) View() string {
 	pagerContent := ""
 	if m.NumTotalItems > 0 {
 		pagerContent = fmt.Sprintf(
-			"%v %v • %v %v/%v • Fetched %v",
-			constants.WaitingIcon,
-			m.LastUpdated.Format("01/02 15:04:05"),
-			m.ItemTypeLabel,
+			"%v • %v",
 			m.currId+1,
 			m.NumTotalItems,
-			m.NumCurrentItems,
 		)
 	}
 	viewport := m.viewport.View()

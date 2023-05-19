@@ -1,8 +1,6 @@
 package table
 
 import (
-	"time"
-
 	"common"
 	"constants"
 	"listviewport"
@@ -29,14 +27,14 @@ type Model struct {
 	rowsViewport  listviewport.Model
 }
 
-func NewModel(style style.Styles, dimensions constants.Dimensions, lastUpdated time.Time, columns []Column, rows []Row, itemTypeLabel string, emptyState *string) Model {
+func NewModel(style style.Styles, dimensions constants.Dimensions, columns []Column, rows []Row, emptyState *string) Model {
 	return Model{
 		style:         style,
 		Columns:       columns,
 		Rows:          rows,
 		EmptyState:    emptyState,
 		minDimensions: dimensions,
-		rowsViewport:  listviewport.NewModel(style, dimensions, lastUpdated, itemTypeLabel, len(rows), 2),
+		rowsViewport:  listviewport.NewModel(style, dimensions, len(rows), 2),
 	}
 }
 
@@ -199,10 +197,6 @@ func (m *Model) renderRow(rowId int, headerColumns []string) string {
 func (m *Model) UpdateStyle(style *style.Styles) {
 	m.style = *style
 	m.rowsViewport.UpdateStyle(style)
-}
-
-func (m *Model) UpdateLastUpdated(t time.Time) {
-	m.rowsViewport.LastUpdated = t
 }
 
 func (m *Model) UpdateTotalItemsCount(count int) {

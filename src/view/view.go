@@ -2,14 +2,13 @@ package view
 
 import (
 	"constants"
-	"environment"
+	env "environment"
+	k8 "k8sinterface"
+	"requests"
 	"shortQuestion"
 	"style"
 	"table"
 	"theme"
-	"time"
-
-	k8 "k8sinterface"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -77,25 +76,48 @@ type Model struct {
 	question shortQuestion.Question
 }
 
-func NewModel(data []table.Row) *Model {
+func NewModel() (*Model, error) {
+	env.SetUpEnv()
+	list, err := requests.GetListAddons()
+	if err != nil {
+		return nil, err
+	}
+	items := NewItems()
+	for _, v := range list.Value() {
+		if v.Name == "common" {
+			continue
+		}
+		info, err := clientMicrok8s.GetModuleInfo(v.Name)
+		if err != nil {
+			return nil, err
+		}
+		status := ""
+		if info.IsEnabled {
+			status = "✓"
+		} else {
+			status = "✗"
+		}
+		items.Append(&Item{
+			Title:       v.Name,
+			Status:      status,
+			Description: v.Path})
+	}
 	s := style.InitStyles(*theme.DefaultTheme)
 	emptyState := "not found"
 	m := Model{
 		table: table.NewModel(s,
 			constants.Dimensions{Width: MinWidth, Height: MinHeight},
-			time.Now(),
 			headers,
-			data,
-			"addons",
+			items.GetItems(),
 			&emptyState),
 		style:    &s,
 		question: shortQuestion.NewQuestionConcrete(),
 	}
-	_, err := environment.ReadFromConfig("domen")
+	_, err = env.ReadFromConfig("domen")
 	if err == nil {
 		m.question.SetAnswered(true)
 	}
-	return &m
+	return &m, nil
 }
 
 func (m Model) Init() tea.Cmd {
@@ -129,7 +151,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			case "enter":
 				domen := m.question.Input().Value()
-				environment.WriteInConfig("domen", domen)
+				env.WriteInConfig("domen", domen)
 				m.question.SetAnswered(true)
 				m.table.SetDimensions(m.question.GetDimensions())
 				m.table.SyncViewPortContent()
