@@ -14,7 +14,7 @@ func printErr(err error) {
 }
 
 func main() {
-	clientMicrok8s, err := k8.GetInterfaceProvider("")
+	clientMicrok8s, err := k8.GetInterfaceProvider("TODO")
 	if err != nil {
 		printErr(err)
 		return

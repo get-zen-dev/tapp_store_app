@@ -40,7 +40,7 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	clientMicrok8s = k8.GetInterfaceProvider()
+	clientMicrok8s, _ = k8.GetInterfaceProvider("")
 )
 
 type Item struct {
