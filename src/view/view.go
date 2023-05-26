@@ -46,7 +46,7 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	domen, _          = env.ReadFromConfig("domen")
+	domen, _          = env.ReadFromConfig("app.env", "domen")
 	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
 )
 

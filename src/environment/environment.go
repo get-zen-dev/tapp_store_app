@@ -33,8 +33,8 @@ func GetRef() string {
 	return ref
 }
 
-func WriteInConfig(key, value string) error {
-	viper.SetConfigFile("./../configs/app.env")
+func WriteInConfig(file, key, value string) error {
+	viper.SetConfigFile("./../configs/" + file)
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println(err)
@@ -47,8 +47,8 @@ func WriteInConfig(key, value string) error {
 	return nil
 }
 
-func ReadFromConfig(key string) (string, error) {
-	viper.SetConfigFile("./../configs/app.env")
+func ReadFromConfig(file, key string) (string, error) {
+	viper.SetConfigFile("./../configs/" + file)
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println(err)
