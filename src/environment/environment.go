@@ -2,6 +2,7 @@ package environment
 
 import (
 	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -59,4 +60,26 @@ func ReadFromConfig(key string) (string, error) {
 	default:
 		return "", fmt.Errorf("domen not found")
 	}
+}
+
+func ReadInfoAddonsMap() *map[string]map[string]string {
+	slice := ReadInfoAddonsSlice()
+	info := map[string]map[string]string{}
+	for _, v := range *slice {
+		info[v["name"]] = map[string]string{}
+		info[v["name"]]["version"] = v["version"]
+		info[v["name"]]["description"] = v["description"]
+	}
+	return &info
+}
+
+func ReadInfoAddonsSlice() *[]map[string]string {
+	viper.SetConfigFile("./../configs/addons.yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
+	slice := []map[string]string{}
+	viper.UnmarshalKey("microk8s-addons.addons", &slice)
+	return &slice
 }
