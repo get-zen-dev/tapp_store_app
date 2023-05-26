@@ -22,7 +22,7 @@ const (
 	ColumnTitleCurrentVersion = "Current version"
 	ColumnTitleDescription    = "Description"
 
-	ColumnFlexTitle          = 3
+	ColumnFlexTitle          = 2
 	ColumnFlexStatus         = 1
 	ColumnFlexVersion        = 1
 	ColumnFlexCurrentVersion = 2
@@ -62,7 +62,7 @@ var (
 	domen, _          = env.ReadFromConfig("app.env", "domen")
 	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
 
-	currentVersion = "current_version.env"
+	currentVersion = "current_version.yaml"
 )
 
 type Item struct {
@@ -207,7 +207,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			index := m.table.GetCurrItem()
 			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
-				if m.table.Rows[index][CurrentVersion] != "" {
+				if m.table.Rows[index][Version] != m.table.Rows[index][CurrentVersion] {
 					clientMicrok8s.RemoveModule(name)
 					clientMicrok8s.InstallModule(name)
 					return Install{index}

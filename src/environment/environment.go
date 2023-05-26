@@ -63,7 +63,7 @@ func ReadFromConfig(file, key string) (string, error) {
 	case string:
 		return data.(string), nil
 	default:
-		return "", fmt.Errorf("domen not found")
+		return "", fmt.Errorf("not found")
 	}
 }
 
