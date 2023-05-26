@@ -216,3 +216,4 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/go,jetbrains,goland+all,visualstudiocode
 src/configs
+src/configs/*
