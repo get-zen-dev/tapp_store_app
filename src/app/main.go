@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
 	k8 "k8sinterface"
 	"os"
 	"view"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func printErr(err error) {

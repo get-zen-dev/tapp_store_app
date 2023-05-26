@@ -19,14 +19,17 @@ import (
 const (
 	ColumnTitleTitle       = "Title"
 	ColumnTitleStatus      = "Status"
+	ColumnTitleVersion     = "Version"
 	ColumnTitleDescription = "Description"
 
 	ColumnFlexTitle       = 3
-	ColumnFlexStatus      = 3
-	ColumnFlexDescription = 3
+	ColumnFlexStatus      = 1
+	ColumnFlexVersion     = 1
+	ColumnFlexDescription = 5
 
 	ColumnMinSizeTitle       = 8
 	ColumnMinSizeStatus      = 8
+	ColumnMinSizeVersion     = 8
 	ColumnMinSizeDescription = 10
 
 	MinWidth  = 50
@@ -40,6 +43,7 @@ var (
 	headers = []table.Column{
 		{Title: ColumnTitleTitle, Width: ColumnMinSizeTitle, MinWidth: ColumnMinSizeTitle, Flex: ColumnFlexTitle},
 		{Title: ColumnTitleStatus, Width: ColumnMinSizeStatus, MinWidth: ColumnMinSizeStatus, Flex: ColumnFlexStatus},
+		{Title: ColumnTitleVersion, Width: ColumnMinSizeVersion, MinWidth: ColumnMinSizeVersion, Flex: ColumnFlexVersion},
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
@@ -49,6 +53,7 @@ var (
 type Item struct {
 	Title       string
 	Status      string
+	Version     string
 	Description string
 }
 
@@ -68,6 +73,7 @@ func makeRow(item *Item) []string {
 	return []string{
 		item.Title,
 		item.Status,
+		item.Version,
 		item.Description,
 	}
 }
@@ -104,6 +110,7 @@ func NewModel() (*Model, error) {
 		items.Append(&Item{
 			Title:       v.Name,
 			Status:      status,
+			Version:     v.Version,
 			Description: v.Description})
 	}
 	s := style.InitStyles(*theme.DefaultTheme)
