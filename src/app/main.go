@@ -13,27 +13,22 @@ func printErr(err error) {
 	os.Exit(1)
 }
 
+func printErrorIfNotNil(err error) {
+	if err != nil {
+		printErr(err)
+	}
+}
+
 func main() {
 	clientMicrok8s, err := k8.GetInterfaceProvider("TODO")
-	if err != nil {
-		printErr(err)
-		return
-	}
-
+	printErrorIfNotNil(err)
 	err = clientMicrok8s.Start()
-	if err != nil {
-		printErr(err)
-	}
+	printErrorIfNotNil(err)
 	defer func(clientMicrok8s k8.KuberInterface) {
-		err := clientMicrok8s.Stop()
-		if err != nil {
-			printErr(err)
-		}
+		printErrorIfNotNil(clientMicrok8s.Stop())
 	}(clientMicrok8s)
 	m, err := view.NewModel()
-	if err != nil {
-		printErr(err)
-	}
+	printErrorIfNotNil(err)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		printErr(err)
