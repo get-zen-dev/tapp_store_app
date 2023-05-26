@@ -25,5 +25,5 @@ func GetInterfaceProvider(domain string) (KuberInterface, error) {
 		return nil, errors.New("cannot user interface without root privileges")
 	}
 
-	return &microk8sClient{domain}, nil
+	return &microk8sClient{domain, ""}, nil
 }
