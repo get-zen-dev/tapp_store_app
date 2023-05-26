@@ -15,7 +15,8 @@ type KuberInterface interface {
 
 	InstallModule(name string) (*ModuleInfo, error)
 	RemoveModule(name string) error
-	GetModuleInfo(name string) (*ModuleInfo, error)
+	GetCachedModuleInfo(name string) (*ModuleInfo, error)
+	RefreshInfoCache() error
 	//UpdateModule(name string) ModuleInfo
 }
 

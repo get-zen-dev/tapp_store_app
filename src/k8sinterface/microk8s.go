@@ -9,7 +9,8 @@ import (
 const commandCore = "microk8s"
 
 type microk8sClient struct {
-	domainName string
+	domainName         string
+	currentStatusCache string
 }
 
 func (m *microk8sClient) Start() error {
@@ -33,7 +34,7 @@ func (m *microk8sClient) InstallModule(name string) (*ModuleInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return m.GetModuleInfo(name)
+	return m.GetCachedModuleInfo(name)
 }
 
 func (m *microk8sClient) RemoveModule(name string) error {
@@ -44,15 +45,15 @@ func (m *microk8sClient) RemoveModule(name string) error {
 	return nil
 }
 
-func (m *microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
-	cmd := exec.Command(commandCore, "status")
-	stdout, err := cmd.Output()
-
-	if err != nil {
-		return nil, err
+func (m *microk8sClient) GetCachedModuleInfo(name string) (*ModuleInfo, error) {
+	if m.currentStatusCache == "" {
+		err := m.RefreshInfoCache()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	status := string(stdout)
+	status := m.currentStatusCache
 	_, enableAndDisable, find := strings.Cut(status, "  enabled:")
 	if !find {
 		return nil, errors.New("enable modules not found")
@@ -73,6 +74,13 @@ func (m *microk8sClient) GetModuleInfo(name string) (*ModuleInfo, error) {
 	result.Name = name
 	result.IsEnabled = isEnabled != -1
 	return &result, nil
+}
+
+func (m *microk8sClient) RefreshInfoCache() error {
+	cmd := exec.Command(commandCore, "status")
+	stdout, err := cmd.Output()
+	m.currentStatusCache = string(stdout)
+	return err
 }
 
 func kuberInitialization() error {

@@ -97,7 +97,7 @@ func NewModel() (*Model, error) {
 	models := env.ReadInfoAddonsModels()
 	items := NewItems()
 	for _, v := range models.Value() {
-		info, err := clientMicrok8s.GetModuleInfo(v.Name)
+		info, err := clientMicrok8s.GetCachedModuleInfo(v.Name)
 		if err != nil {
 			return nil, err
 		}
