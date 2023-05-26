@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	k8 "k8sinterface"
 	"requests"
-	"shortQuestion"
 	"style"
 	"table"
 	"theme"
@@ -47,7 +46,8 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	clientMicrok8s, _ = k8.GetInterfaceProvider("")
+	domen, _          = env.ReadFromConfig("domen")
+	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
 )
 
 type Item struct {
@@ -83,10 +83,9 @@ func (i *Items) GetItems() []table.Row {
 }
 
 type Model struct {
-	table    table.Model
-	style    *style.Styles
-	question shortQuestion.Question
-	help     help.Model
+	table table.Model
+	style *style.Styles
+	help  help.Model
 }
 
 func NewModel() (*Model, error) {
@@ -121,13 +120,8 @@ func NewModel() (*Model, error) {
 			headers,
 			items.GetItems(),
 			&emptyState),
-		style:    &s,
-		question: shortQuestion.NewQuestionConcrete(),
-		help:     help.New(),
-	}
-	_, err = env.ReadFromConfig("domen")
-	if err == nil {
-		m.question.SetAnswered(true)
+		style: &s,
+		help:  help.New(),
 	}
 	return &m, nil
 }
@@ -145,69 +139,45 @@ type Delete struct {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.question.Answered() {
-		switch msg := msg.(type) {
-		case tea.WindowSizeMsg:
-			m.help.Width = msg.Width
-			m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort})
-			m.table.SyncViewPortContent()
-		case Install:
-			m.table.Rows[msg.index][1] = Installed
-			m.table.SyncViewPortContent()
-		case Delete:
-			m.table.Rows[msg.index][1] = Deleted
-			m.table.SyncViewPortContent()
-		case tea.KeyMsg:
-			switch {
-			case key.Matches(msg, constants.Keys.Quit):
-				return m, tea.Quit
-			case key.Matches(msg, constants.Keys.Up):
-				m.table.PrevItem()
-			case key.Matches(msg, constants.Keys.Down):
-				m.table.NextItem()
-			case key.Matches(msg, constants.Keys.Install):
-				index := m.table.GetCurrItem()
-				name := m.table.Rows[index][0]
-				return m, func() tea.Msg {
-					clientMicrok8s.InstallModule(name)
-					return Install{index}
-				}
-			case key.Matches(msg, constants.Keys.Delete):
-				index := m.table.GetCurrItem()
-				name := m.table.Rows[index][0]
-				return m, func() tea.Msg {
-					clientMicrok8s.RemoveModule(name)
-					return Delete{index}
-				}
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.help.Width = msg.Width
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort})
+		m.table.SyncViewPortContent()
+	case Install:
+		m.table.Rows[msg.index][1] = Installed
+		m.table.SyncViewPortContent()
+	case Delete:
+		m.table.Rows[msg.index][1] = Deleted
+		m.table.SyncViewPortContent()
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, constants.Keys.Quit):
+			return m, tea.Quit
+		case key.Matches(msg, constants.Keys.Up):
+			m.table.PrevItem()
+		case key.Matches(msg, constants.Keys.Down):
+			m.table.NextItem()
+		case key.Matches(msg, constants.Keys.Install):
+			index := m.table.GetCurrItem()
+			name := m.table.Rows[index][0]
+			return m, func() tea.Msg {
+				clientMicrok8s.InstallModule(name)
+				return Install{index}
+			}
+		case key.Matches(msg, constants.Keys.Delete):
+			index := m.table.GetCurrItem()
+			name := m.table.Rows[index][0]
+			return m, func() tea.Msg {
+				clientMicrok8s.RemoveModule(name)
+				return Delete{index}
 			}
 		}
-		return m, nil
-	} else {
-		switch msg := msg.(type) {
-		case tea.WindowSizeMsg:
-			m.help.Width = msg.Width
-			m.question.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
-		case tea.KeyMsg:
-			switch {
-			case key.Matches(msg, constants.Keys.QuitWithoutQ):
-				return m, tea.Quit
-			case key.Matches(msg, constants.Keys.Enter):
-				domen := m.question.Input().Value()
-				env.WriteInConfig("domen", domen)
-				m.question.SetAnswered(true)
-				m.table.SetDimensions(m.question.GetDimensions())
-				m.table.SyncViewPortContent()
-				return m, m.question.Input().Blur
-			}
-		}
-		return m, m.question.Update(msg)
 	}
+	return m, nil
 }
 
 func (m *Model) View() string {
-	if m.question.Answered() {
-		return lipgloss.JoinVertical(lipgloss.Left,
-			m.table.View(), m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)))
-	}
-	return m.question.View()
+	return lipgloss.JoinVertical(lipgloss.Left,
+		m.table.View(), m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)))
 }

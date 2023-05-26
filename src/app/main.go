@@ -1,6 +1,7 @@
 package main
 
 import (
+	env "environment"
 	"fmt"
 	k8 "k8sinterface"
 	"os"
@@ -21,13 +22,24 @@ func printErrorIfNotNil(err error) {
 }
 
 func main() {
-	clientMicrok8s, err := k8.GetInterfaceProvider("TODO")
+	domen, err := env.ReadFromConfig("domen")
+	if err != nil {
+		q, err := view.NewQuestion()
+		printErrorIfNotNil(err)
+		p := tea.NewProgram(q, tea.WithAltScreen())
+		if _, err := p.Run(); err != nil {
+			printErr(err)
+		}
+	}
+
+	clientMicrok8s, err := k8.GetInterfaceProvider(domen)
 	printErrorIfNotNil(err)
 	err = clientMicrok8s.Start()
 	printErrorIfNotNil(err)
 	defer func(clientMicrok8s k8.KuberInterface) {
 		printErrorIfNotNil(clientMicrok8s.Stop())
 	}(clientMicrok8s)
+
 	m, err := view.NewModel()
 	printErrorIfNotNil(err)
 	p := tea.NewProgram(m, tea.WithAltScreen())
