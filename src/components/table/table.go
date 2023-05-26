@@ -184,7 +184,12 @@ func (m *Model) renderRow(rowId int, headerColumns []string) string {
 
 	for i := range m.Columns {
 		colWidth := lipgloss.Width(headerColumns[headerColId])
-		renderedCol := style.Copy().Width(colWidth).MaxWidth(colWidth).Height(1).MaxHeight(1).Render(m.Rows[rowId][i])
+		content := m.Rows[rowId][i]
+		if colWidth < len(content) + 1 {
+			content = content[0 : listviewport.Max(colWidth-5, 0)]
+			content += "..."
+		}
+		renderedCol := style.Copy().Width(colWidth).MaxWidth(colWidth).Height(1).MaxHeight(1).Render(content)
 		renderedColumns = append(renderedColumns, renderedCol)
 		headerColId++
 	}

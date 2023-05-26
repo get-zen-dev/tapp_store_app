@@ -19,14 +19,14 @@ const (
 	ColumnTitleTitle          = "Title"
 	ColumnTitleStatus         = "Status"
 	ColumnTitleVersion        = "Version"
-	ColumnTitleCurrentVersion = "Current version"
+	ColumnTitleCurrentVersion = "Now"
 	ColumnTitleDescription    = "Description"
 
-	ColumnFlexTitle          = 2
-	ColumnFlexStatus         = 1
-	ColumnFlexVersion        = 1
-	ColumnFlexCurrentVersion = 2
-	ColumnFlexDescription    = 5
+	ColumnFlexTitle          = 6
+	ColumnFlexStatus         = 4
+	ColumnFlexVersion        = 4
+	ColumnFlexCurrentVersion = 4
+	ColumnFlexDescription    = 6
 
 	ColumnMinSizeTitle          = 8
 	ColumnMinSizeStatus         = 8
