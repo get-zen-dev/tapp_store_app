@@ -37,12 +37,6 @@ type Dimensions struct {
 	Height int
 }
 
-const (
-	WaitingIcon = ""
-	FailureIcon = "󰅙"
-	SuccessIcon = ""
-)
-
 var Keys = KeyMap{
 	Up: key.NewBinding(
 		key.WithKeys("up", "k"),
