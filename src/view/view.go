@@ -45,6 +45,7 @@ const (
 
 	Installed = "✓"
 	Deleted   = "✗"
+	Outdated  = "—"
 
 	HeightLastLink = 2
 )
@@ -118,17 +119,21 @@ func NewModel() (*Model, error) {
 			return nil, err
 		}
 		status := ""
+		curVersion, _ := env.ReadFromConfig(currentVersion, v.Name)
 		if info.IsEnabled {
-			status = Installed
+			if v.Version == curVersion {
+				status = Installed
+			} else {
+				status = Outdated
+			}
 		} else {
 			status = Deleted
 		}
-		curStatus, _ := env.ReadFromConfig(currentVersion, v.Name)
 		items.Append(&Item{
 			Title:          v.Name,
 			Status:         status,
 			Version:        v.Version,
-			CurrentVersion: curStatus,
+			CurrentVersion: curVersion,
 			Description:    v.Description})
 	}
 	s := style.InitStyles(*theme.DefaultTheme)
