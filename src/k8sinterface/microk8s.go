@@ -19,6 +19,8 @@ func (m *microk8sClient) Start() error {
 		if err != nil {
 			return err
 		}
+	} else if !checkSetupRepositoryOfAddons() {
+		setupRepositoryOfAddons()
 	}
 
 	return invokeCommand(commandCore, "start")
@@ -56,18 +58,18 @@ func (m *microk8sClient) GetCachedModuleInfo(name string) (*ModuleInfo, error) {
 	status := m.currentStatusCache
 	_, enableAndDisable, find := strings.Cut(status, "  enabled:")
 	if !find {
-		return nil, errors.New("enable modules not found")
+		return nil, errors.New(name + ": enable modules not found")
 	}
 	enable, disable, find := strings.Cut(enableAndDisable, "  disabled:")
 	if !find {
-		return nil, errors.New("disabled modules not found")
+		return nil, errors.New(name + ": disabled modules not found")
 	}
 
 	isEnabled := strings.Index(enable, name)
 	isDisabled := strings.Index(disable, name)
 
 	if isEnabled == -1 && isDisabled == -1 {
-		return nil, errors.New("module is not provided")
+		return nil, errors.New(name + ": module is not provided")
 	}
 
 	result := ModuleInfo{}

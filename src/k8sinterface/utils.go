@@ -76,3 +76,9 @@ func addGroupMicrok8s() error {
 	err = invokeCommand(cmd)
 	return err
 }
+
+func checkSetupRepositoryOfAddons() bool {
+	cmd := "ls /var/snap/microk8s/common/addons/get-zen"
+	_, err := exec.Command("sh", "-c", cmd).Output()
+	return err == nil
+}

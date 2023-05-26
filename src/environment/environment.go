@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	owner      = "canonical"
-	repository = "microk8s-core-addons"
+	owner      = "get-zen-dev"
+	repository = "tapp_store_rep"
 	path       = "addons"
 	ref        = "main"
 )
