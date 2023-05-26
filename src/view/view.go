@@ -84,15 +84,13 @@ type Model struct {
 }
 
 func NewModel() (*Model, error) {
-	list, err := requests.GetListAddons()
+	err := requests.DownloadInfoAddons()
 	if err != nil {
 		return nil, err
 	}
+	models := env.ReadInfoAddonsModels()
 	items := NewItems()
-	for _, v := range list.Value() {
-		if v.Name == "common" {
-			continue
-		}
+	for _, v := range models.Value() {
 		info, err := clientMicrok8s.GetModuleInfo(v.Name)
 		if err != nil {
 			return nil, err
@@ -106,7 +104,7 @@ func NewModel() (*Model, error) {
 		items.Append(&Item{
 			Title:       v.Name,
 			Status:      status,
-			Description: v.Path})
+			Description: v.Description})
 	}
 	s := style.InitStyles(*theme.DefaultTheme)
 	emptyState := "not found"

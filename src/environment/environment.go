@@ -62,15 +62,13 @@ func ReadFromConfig(key string) (string, error) {
 	}
 }
 
-func ReadInfoAddonsMap() *map[string]map[string]string {
+func ReadInfoAddonsModels() *Models {
 	slice := ReadInfoAddonsSlice()
-	info := map[string]map[string]string{}
+	models := Models{}
 	for _, v := range *slice {
-		info[v["name"]] = map[string]string{}
-		info[v["name"]]["version"] = v["version"]
-		info[v["name"]]["description"] = v["description"]
+		models.append(Model{v["name"], v["version"], v["description"]})
 	}
-	return &info
+	return &models
 }
 
 func ReadInfoAddonsSlice() *[]map[string]string {
