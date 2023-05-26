@@ -4,7 +4,6 @@ use (
 	./app
 	./environment
 	./requests
-	./table
 	./view
 	./k8sinterface
 	./components/theme
