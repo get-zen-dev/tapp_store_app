@@ -3,13 +3,15 @@ package view
 import (
 	"constants"
 	env "environment"
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/lipgloss"
+	"errors"
 	k8 "k8sinterface"
 	"requests"
 	"style"
 	"table"
 	"theme"
+
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
@@ -151,12 +153,35 @@ func NewModel() (*Model, error) {
 	return &m, nil
 }
 
+func (m *Model) updateStatus() error {
+	err := clientMicrok8s.RefreshInfoCache()
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(m.table.Rows); i++ {
+		title := m.table.Rows[i][Title]
+		info, err := clientMicrok8s.GetCachedModuleInfo(title)
+		if err != nil {
+			return err
+		}
+		curVersion, _ := env.ReadFromConfig(currentVersion, title)
+		if info.IsEnabled && curVersion == "" {
+			m.table.Rows[i][Status] = Installed
+			version := m.table.Rows[i][Version]
+			env.WriteInConfig(currentVersion, title, version)
+			m.table.Rows[i][CurrentVersion] = version
+		}
+	}
+	return nil
+}
+
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
 type Install struct {
 	index int
+	err   error
 }
 
 type Delete struct {
@@ -170,10 +195,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort - HeightLastLink})
 		m.table.SyncViewPortContent()
 	case Install:
-		m.table.Rows[msg.index][Status] = Installed
-		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], m.table.Rows[msg.index][Version])
-		m.table.Rows[msg.index][CurrentVersion] = m.table.Rows[msg.index][Version]
-		m.lastLink = "https://codeforces.com/" + m.table.Rows[msg.index][Title]
+		if msg.err != nil {
+			m.lastLink = "error: " + msg.err.Error()
+		} else {
+			m.lastLink = "link: https://codeforces.com/" + m.table.Rows[msg.index][Title]
+		}
 		m.table.SyncViewPortContent()
 	case Delete:
 		m.table.Rows[msg.index][Status] = Deleted
@@ -193,8 +219,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			index := m.table.GetCurrItem()
 			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
-				clientMicrok8s.InstallModule(name)
-				return Install{index}
+				_, errFst := clientMicrok8s.InstallModule(name)
+				errSnd := m.updateStatus()
+				var err error = nil
+				if errFst != nil || errSnd != nil {
+					err = errors.Join(errFst, errSnd)
+				}
+				return Install{index, err}
 			}
 		case key.Matches(msg, constants.Keys.Delete):
 			index := m.table.GetCurrItem()
@@ -210,7 +241,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.table.Rows[index][Version] != m.table.Rows[index][CurrentVersion] {
 					clientMicrok8s.RemoveModule(name)
 					clientMicrok8s.InstallModule(name)
-					return Install{index}
+					return Install{index, nil}
 				}
 				return nil
 			}
@@ -220,13 +251,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	link := ""
-	if m.lastLink != "" {
-		link = "link: " + m.lastLink
-	}
 	return lipgloss.JoinVertical(lipgloss.Left,
 		m.table.View(),
 		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)),
-		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.Styles.Ellipsis.Copy().Render(link)),
+		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.Styles.Ellipsis.Copy().Render(m.lastLink)),
 	)
 }
