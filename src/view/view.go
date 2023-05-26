@@ -34,6 +34,12 @@ const (
 	ColumnMinSizeCurrentVersion = 8
 	ColumnMinSizeDescription    = 10
 
+	Title          = 0
+	Status         = 1
+	Version        = 2
+	CurrentVersion = 3
+	Description    = 4
+
 	MinWidth  = 50
 	MinHeight = 10
 
@@ -52,6 +58,8 @@ var (
 
 	domen, _          = env.ReadFromConfig("app.env", "domen")
 	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
+
+	currentVersion = "current_version.env"
 )
 
 type Item struct {
@@ -112,7 +120,7 @@ func NewModel() (*Model, error) {
 		} else {
 			status = Deleted
 		}
-		curStatus, _ := env.ReadFromConfig("current_status.env", v.Name)
+		curStatus, _ := env.ReadFromConfig(currentVersion, v.Name)
 		items.Append(&Item{
 			Title:          v.Name,
 			Status:         status,
@@ -153,14 +161,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort})
 		m.table.SyncViewPortContent()
 	case Install:
-		m.table.Rows[msg.index][1] = Installed
-		env.WriteInConfig("current_status.env", m.table.Rows[msg.index][0], m.table.Rows[msg.index][2])
-		m.table.Rows[msg.index][3] = m.table.Rows[msg.index][2]
+		m.table.Rows[msg.index][Status] = Installed
+		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], m.table.Rows[msg.index][Version])
+		m.table.Rows[msg.index][CurrentVersion] = m.table.Rows[msg.index][Version]
 		m.table.SyncViewPortContent()
 	case Delete:
-		m.table.Rows[msg.index][1] = Deleted
-		env.WriteInConfig("current_status.env", m.table.Rows[msg.index][0], "")
-		m.table.Rows[msg.index][3] = ""
+		m.table.Rows[msg.index][Status] = Deleted
+		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
+		m.table.Rows[msg.index][CurrentVersion] = ""
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch {
@@ -172,14 +180,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.table.NextItem()
 		case key.Matches(msg, constants.Keys.Install):
 			index := m.table.GetCurrItem()
-			name := m.table.Rows[index][0]
+			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
 				clientMicrok8s.InstallModule(name)
 				return Install{index}
 			}
 		case key.Matches(msg, constants.Keys.Delete):
 			index := m.table.GetCurrItem()
-			name := m.table.Rows[index][0]
+			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
 				clientMicrok8s.RemoveModule(name)
 				return Delete{index}
