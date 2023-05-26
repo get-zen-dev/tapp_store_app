@@ -33,14 +33,20 @@ func GetRef() string {
 	return ref
 }
 
-func WriteInConfig(file, key, value string) error {
-	viper.SetConfigFile("./../configs/" + file)
-	err := viper.ReadInConfig()
+func initViper(file string) *viper.Viper {
+	v := viper.New()
+	v.SetConfigFile("./../configs/" + file)
+	err := v.ReadInConfig()
 	if err != nil {
 		fmt.Println(err)
 	}
-	viper.Set(key, value)
-	err = viper.WriteConfig()
+	return v
+}
+
+func WriteInConfig(file, key, value string) error {
+	v := initViper(file)
+	v.Set(key, value)
+	err := v.WriteConfig()
 	if err != nil {
 		return err
 	}
@@ -48,12 +54,8 @@ func WriteInConfig(file, key, value string) error {
 }
 
 func ReadFromConfig(file, key string) (string, error) {
-	viper.SetConfigFile("./../configs/" + file)
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Println(err)
-	}
-	data := viper.Get(key)
+	v := initViper(file)
+	data := v.Get(key)
 	switch data.(type) {
 	case string:
 		return data.(string), nil

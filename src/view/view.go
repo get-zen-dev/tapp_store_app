@@ -16,20 +16,23 @@ import (
 )
 
 const (
-	ColumnTitleTitle       = "Title"
-	ColumnTitleStatus      = "Status"
-	ColumnTitleVersion     = "Version"
-	ColumnTitleDescription = "Description"
+	ColumnTitleTitle          = "Title"
+	ColumnTitleStatus         = "Status"
+	ColumnTitleVersion        = "Version"
+	ColumnTitleCurrentVersion = "Current version"
+	ColumnTitleDescription    = "Description"
 
-	ColumnFlexTitle       = 3
-	ColumnFlexStatus      = 1
-	ColumnFlexVersion     = 1
-	ColumnFlexDescription = 5
+	ColumnFlexTitle          = 3
+	ColumnFlexStatus         = 1
+	ColumnFlexVersion        = 1
+	ColumnFlexCurrentVersion = 2
+	ColumnFlexDescription    = 5
 
-	ColumnMinSizeTitle       = 8
-	ColumnMinSizeStatus      = 8
-	ColumnMinSizeVersion     = 8
-	ColumnMinSizeDescription = 10
+	ColumnMinSizeTitle          = 8
+	ColumnMinSizeStatus         = 8
+	ColumnMinSizeVersion        = 8
+	ColumnMinSizeCurrentVersion = 8
+	ColumnMinSizeDescription    = 10
 
 	MinWidth  = 50
 	MinHeight = 10
@@ -43,6 +46,7 @@ var (
 		{Title: ColumnTitleTitle, Width: ColumnMinSizeTitle, MinWidth: ColumnMinSizeTitle, Flex: ColumnFlexTitle},
 		{Title: ColumnTitleStatus, Width: ColumnMinSizeStatus, MinWidth: ColumnMinSizeStatus, Flex: ColumnFlexStatus},
 		{Title: ColumnTitleVersion, Width: ColumnMinSizeVersion, MinWidth: ColumnMinSizeVersion, Flex: ColumnFlexVersion},
+		{Title: ColumnTitleCurrentVersion, Width: ColumnMinSizeCurrentVersion, MinWidth: ColumnMinSizeCurrentVersion, Flex: ColumnFlexCurrentVersion},
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
@@ -51,10 +55,11 @@ var (
 )
 
 type Item struct {
-	Title       string
-	Status      string
-	Version     string
-	Description string
+	Title          string
+	Status         string
+	Version        string
+	CurrentVersion string
+	Description    string
 }
 
 type Items struct {
@@ -74,6 +79,7 @@ func makeRow(item *Item) []string {
 		item.Title,
 		item.Status,
 		item.Version,
+		item.CurrentVersion,
 		item.Description,
 	}
 }
@@ -106,11 +112,13 @@ func NewModel() (*Model, error) {
 		} else {
 			status = Deleted
 		}
+		curStatus, _ := env.ReadFromConfig("current_status.env", v.Name)
 		items.Append(&Item{
-			Title:       v.Name,
-			Status:      status,
-			Version:     v.Version,
-			Description: v.Description})
+			Title:          v.Name,
+			Status:         status,
+			Version:        v.Version,
+			CurrentVersion: curStatus,
+			Description:    v.Description})
 	}
 	s := style.InitStyles(*theme.DefaultTheme)
 	emptyState := "not found"
@@ -146,9 +154,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SyncViewPortContent()
 	case Install:
 		m.table.Rows[msg.index][1] = Installed
+		env.WriteInConfig("current_status.env", m.table.Rows[msg.index][0], m.table.Rows[msg.index][2])
+		m.table.Rows[msg.index][3] = m.table.Rows[msg.index][2]
 		m.table.SyncViewPortContent()
 	case Delete:
 		m.table.Rows[msg.index][1] = Deleted
+		env.WriteInConfig("current_status.env", m.table.Rows[msg.index][0], "")
+		m.table.Rows[msg.index][3] = ""
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch {
