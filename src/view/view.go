@@ -45,6 +45,8 @@ const (
 
 	Installed = "✓"
 	Deleted   = "✗"
+
+	HeightLastLink = 2
 )
 
 var (
@@ -97,9 +99,10 @@ func (i *Items) GetItems() []table.Row {
 }
 
 type Model struct {
-	table table.Model
-	style *style.Styles
-	help  help.Model
+	table    table.Model
+	style    *style.Styles
+	help     help.Model
+	lastLink string
 }
 
 func NewModel() (*Model, error) {
@@ -136,8 +139,9 @@ func NewModel() (*Model, error) {
 			headers,
 			items.GetItems(),
 			&emptyState),
-		style: &s,
-		help:  help.New(),
+		style:    &s,
+		help:     help.New(),
+		lastLink: "",
 	}
 	return &m, nil
 }
@@ -158,17 +162,19 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.help.Width = msg.Width
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort})
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort - HeightLastLink})
 		m.table.SyncViewPortContent()
 	case Install:
 		m.table.Rows[msg.index][Status] = Installed
 		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], m.table.Rows[msg.index][Version])
 		m.table.Rows[msg.index][CurrentVersion] = m.table.Rows[msg.index][Version]
+		m.lastLink = "https://codeforces.com/" + m.table.Rows[msg.index][Title]
 		m.table.SyncViewPortContent()
 	case Delete:
 		m.table.Rows[msg.index][Status] = Deleted
 		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
 		m.table.Rows[msg.index][CurrentVersion] = ""
+		m.lastLink = ""
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch {
@@ -192,12 +198,30 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				clientMicrok8s.RemoveModule(name)
 				return Delete{index}
 			}
+		case key.Matches(msg, constants.Keys.Update):
+			index := m.table.GetCurrItem()
+			name := m.table.Rows[index][Title]
+			return m, func() tea.Msg {
+				if m.table.Rows[index][CurrentVersion] != "" {
+					clientMicrok8s.RemoveModule(name)
+					clientMicrok8s.InstallModule(name)
+					return Install{index}
+				}
+				return nil
+			}
 		}
 	}
 	return m, nil
 }
 
 func (m *Model) View() string {
+	link := ""
+	if m.lastLink != "" {
+		link = "link: " + m.lastLink
+	}
 	return lipgloss.JoinVertical(lipgloss.Left,
-		m.table.View(), m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)))
+		m.table.View(),
+		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)),
+		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.Styles.Ellipsis.Copy().Render(link)),
+	)
 }

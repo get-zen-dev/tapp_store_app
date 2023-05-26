@@ -12,6 +12,7 @@ type KeyMap struct {
 	TogglePreview key.Binding
 	Install       key.Binding
 	Delete        key.Binding
+	Update        key.Binding
 	Help          key.Binding
 	Quit          key.Binding
 	QuitWithoutQ  key.Binding
@@ -21,7 +22,7 @@ type KeyMap struct {
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Up, k.Down, k.Install, k.Delete}
+	return []key.Binding{k.Up, k.Down, k.Install, k.Delete, k.Update}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
@@ -66,6 +67,10 @@ var Keys = KeyMap{
 	Delete: key.NewBinding(
 		key.WithKeys("d"),
 		key.WithHelp("d", "delete addon"),
+	),
+	Update: key.NewBinding(
+		key.WithKeys("u"),
+		key.WithHelp("u", "update addon"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
