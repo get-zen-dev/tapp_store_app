@@ -2,6 +2,7 @@ package k8sinterface
 
 import (
 	"errors"
+	"net/url"
 	"os/exec"
 	"strings"
 )
@@ -86,7 +87,7 @@ func (m *microk8sClient) RefreshInfoCache() error {
 }
 
 func kuberInitialization() error {
-	err := invokeCommand("snap", "install", "microk8s", "--classic")
+	err := invokeCommand("snap", "install", "microk8s", "--classic", "--channel=1.24/stable")
 	if err != nil {
 		return errors.Join(errors.New("incorrect microk8s install"), err)
 	}
@@ -107,4 +108,9 @@ func kuberInitialization() error {
 	}
 
 	return setupRepositoryOfAddons()
+}
+
+func (m *microk8sClient) GetModuleUrl(name string) (url.URL, error) {
+	//TODO: Чтение путей из microk8s
+	return url.URL{Host: "localhost", Scheme: "https"}, nil
 }

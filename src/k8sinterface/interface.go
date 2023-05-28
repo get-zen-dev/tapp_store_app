@@ -1,6 +1,9 @@
 package k8sinterface
 
-import "errors"
+import (
+	"errors"
+	"net/url"
+)
 
 type ModuleInfo struct {
 	Name      string
@@ -17,7 +20,7 @@ type KuberInterface interface {
 	RemoveModule(name string) error
 	GetCachedModuleInfo(name string) (*ModuleInfo, error)
 	RefreshInfoCache() error
-	//UpdateModule(name string) ModuleInfo
+	GetModuleUrl(name string) (url.URL, error)
 }
 
 func GetInterfaceProvider(domain string) (KuberInterface, error) {
