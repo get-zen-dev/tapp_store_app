@@ -4,6 +4,7 @@ import (
 	"constants"
 	env "environment"
 	"errors"
+	"fmt"
 	k8 "k8sinterface"
 	"requests"
 	"style"
@@ -49,7 +50,7 @@ const (
 	Deleted   = "✗"
 	Outdated  = "—"
 
-	HeightLastLink = 2
+	HeightMessage = 2
 )
 
 var (
@@ -102,10 +103,10 @@ func (i *Items) GetItems() []table.Row {
 }
 
 type Model struct {
-	table    table.Model
-	style    *style.Styles
-	help     help.Model
-	lastLink string
+	table     table.Model
+	style     *style.Styles
+	help      help.Model
+	lastError string
 }
 
 func NewModel() (*Model, error) {
@@ -148,7 +149,7 @@ func NewModel() (*Model, error) {
 			&emptyState),
 		style:    &s,
 		help:     help.New(),
-		lastLink: "",
+		lastError: "",
 	}
 	return &m, nil
 }
@@ -192,20 +193,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.help.Width = msg.Width
-		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort - HeightLastLink})
+		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort - HeightMessage})
 		m.table.SyncViewPortContent()
 	case Install:
 		if msg.err != nil {
-			m.lastLink = "error: " + msg.err.Error()
-		} else {
-			m.lastLink = "link: https://codeforces.com/" + m.table.Rows[msg.index][Title]
+			m.lastError = "error: " + msg.err.Error()
 		}
 		m.table.SyncViewPortContent()
 	case Delete:
 		m.table.Rows[msg.index][Status] = Deleted
 		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
 		m.table.Rows[msg.index][CurrentVersion] = ""
-		m.lastLink = ""
+		m.lastError = ""
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch {
@@ -251,9 +250,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
+	message := m.lastError
+	if message != "" {
+		message = fmt.Sprintf("https::/%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domen)
+	}
 	return lipgloss.JoinVertical(lipgloss.Left,
 		m.table.View(),
 		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.View(constants.Keys)),
-		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.Styles.Ellipsis.Copy().Render(m.lastLink)),
+		m.style.Common.FooterStyle.Width(m.help.Width).Render(m.help.Styles.Ellipsis.Copy().Render(message)),
 	)
 }
