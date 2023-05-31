@@ -4,6 +4,13 @@ use (
 	./app
 	./environment
 	./requests
-	./table
 	./view
+	./k8sinterface
+	./components/theme
+	./components/constants
+	./components/common
+	./components/style
+	./components/listviewport
+	./components/table
+	./components/shortQuestion
 )

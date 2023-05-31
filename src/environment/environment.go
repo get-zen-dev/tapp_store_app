@@ -2,26 +2,17 @@ package environment
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
 
-var owner string
-var repository string
-var path string
-var ref string
-
-func SetUpEnv() {
-	viper.SetConfigFile("./../configs/app.env")
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Println(err)
-	}
-	owner = viper.Get("owner").(string)
-	repository = viper.Get("repository").(string)
-	path = viper.Get("path").(string)
-	ref = viper.Get("ref").(string)
-}
+var (
+	owner      = "get-zen-dev"
+	repository = "tapp_store_rep"
+	path       = "addons"
+	ref        = "main"
+)
 
 // Returns the name of owner of the repository with addons
 func GetOwner() string {
@@ -41,4 +32,57 @@ func GetPath() string {
 // Returns the ref in the repository
 func GetRef() string {
 	return ref
+}
+
+func initViper(file string) *viper.Viper {
+	v := viper.New()
+	v.SetConfigFile("./../configs/" + file)
+	err := v.ReadInConfig()
+	if err != nil {
+		if _, ok := err.(*os.PathError); !ok {
+			panic(err)
+		}
+	}
+	return v
+}
+
+func WriteInConfig(file, key, value string) error {
+	v := initViper(file)
+	v.Set(key, value)
+	err := v.WriteConfig()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReadFromConfig(file, key string) (string, error) {
+	v := initViper(file)
+	data := v.Get(key)
+	switch data.(type) {
+	case string:
+		return data.(string), nil
+	default:
+		return "", fmt.Errorf("not found")
+	}
+}
+
+func ReadInfoAddonsModels() *Models {
+	slice := ReadInfoAddonsSlice()
+	models := Models{}
+	for _, v := range *slice {
+		models.append(Model{v["name"], v["version"], v["description"]})
+	}
+	return &models
+}
+
+func ReadInfoAddonsSlice() *[]map[string]string {
+	viper.SetConfigFile("./../configs/addons.yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+	slice := []map[string]string{}
+	viper.UnmarshalKey("microk8s-addons.addons", &slice)
+	return &slice
 }
