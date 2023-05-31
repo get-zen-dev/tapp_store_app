@@ -21,8 +21,8 @@ import (
 const (
 	ColumnTitleTitle          = "Title"
 	ColumnTitleStatus         = "Status"
-	ColumnTitleVersion        = "Version"
-	ColumnTitleCurrentVersion = "Now"
+	ColumnTitleVersion        = "Ver"
+	ColumnTitleCurrentVersion = "Current ver"
 	ColumnTitleDescription    = "Description"
 
 	ColumnFlexTitle          = 6
@@ -204,7 +204,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.Rows[msg.index][Status] = Deleted
 		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
 		m.table.Rows[msg.index][CurrentVersion] = ""
-		m.lastError = ""
 		m.table.SyncViewPortContent()
 	case tea.KeyMsg:
 		switch {
@@ -251,7 +250,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model) View() string {
 	message := m.lastError
-	if message != "" {
+	m.lastError = ""
+	if message == "" {
 		message = fmt.Sprintf("https::/%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domen)
 	}
 	return lipgloss.JoinVertical(lipgloss.Left,
