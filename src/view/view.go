@@ -65,7 +65,10 @@ var (
 	domen, _          = env.ReadFromConfig("app.env", "domen")
 	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
 
+	initStyle = style.InitStyles(*theme.DefaultTheme)
+
 	currentVersion = "current_version.yaml"
+	emptyState     = "not found"
 )
 
 type Item struct {
@@ -110,27 +113,16 @@ type Model struct {
 }
 
 func NewModel() (*Model, error) {
-	err := requests.DownloadInfoAddons()
-	if err != nil {
-		return nil, err
+	e := requests.DownloadInfoAddons()
+	if e != nil {
+		return nil, e
 	}
 	models := env.ReadInfoAddonsModels()
 	items := NewItems()
 	for _, v := range models.Value() {
-		info, err := clientMicrok8s.GetCachedModuleInfo(v.Name)
+		status, curVersion, err := getStatusAndCurVersion(v)
 		if err != nil {
 			return nil, err
-		}
-		status := ""
-		curVersion, _ := env.ReadFromConfig(currentVersion, v.Name)
-		if info.IsEnabled {
-			if v.Version == curVersion {
-				status = Installed
-			} else {
-				status = Outdated
-			}
-		} else {
-			status = Deleted
 		}
 		items.Append(&Item{
 			Title:          v.Name,
@@ -139,19 +131,34 @@ func NewModel() (*Model, error) {
 			CurrentVersion: curVersion,
 			Description:    v.Description})
 	}
-	s := style.InitStyles(*theme.DefaultTheme)
-	emptyState := "not found"
 	m := Model{
-		table: table.NewModel(s,
+		table: table.NewModel(initStyle,
 			constants.Dimensions{Width: MinWidth, Height: MinHeight},
 			headers,
 			items.GetItems(),
 			&emptyState),
-		style:    &s,
-		help:     help.New(),
+		style:     &initStyle,
+		help:      help.New(),
 		lastError: "",
 	}
 	return &m, nil
+}
+
+func getStatusAndCurVersion(v env.Model) (string, string, error) {
+	info, err := clientMicrok8s.GetCachedModuleInfo(v.Name)
+	if err != nil {
+		return "", "", err
+	}
+	curVersion, _ := env.ReadFromConfig(currentVersion, v.Name)
+	if info.IsEnabled {
+		if v.Version == curVersion {
+			return Installed, curVersion, nil
+		} else {
+			return Outdated, curVersion, nil
+		}
+	} else {
+		return Deleted, curVersion, nil
+	}
 }
 
 func (m *Model) updateStatus() error {
