@@ -40,7 +40,7 @@ func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			next := NewModelWaiting(
 				func() error {
 					return clientMicrok8s.Start()
-				})
+				}, KubernetesLaunch)
 			next.width = m.question.GetDimensions().Width
 			next.height = m.question.GetDimensions().Height
 			return next, next.spinner.Tick

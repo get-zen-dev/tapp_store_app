@@ -11,11 +11,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+var (
+	KubernetesLaunch = "Wait. Kubernetes launches"
+)
+
 type errMsg error
 
 type Waiting struct {
 	spinner  spinner.Model
 	style    style.StylesWaiting
+	text     string
 	width    int
 	height   int
 	quitting bool
@@ -29,12 +34,12 @@ var points = spinner.Spinner{
 	FPS:    time.Second / 7,
 }
 
-func NewModelWaiting(fn func() error) Waiting {
+func NewModelWaiting(fn func() error, text string) Waiting {
 	spin := spinner.New()
 	spin.Spinner = points
 	s := style.InitStylesWaiting(*theme.DefaultTheme)
 	spin.Style = s.Spinner
-	return Waiting{spinner: spin, style: s, command: fn}
+	return Waiting{spinner: spin, style: s, text: text, command: fn}
 }
 
 func (m Waiting) Init() tea.Cmd {
@@ -97,7 +102,7 @@ func (m Waiting) View() string {
 		lipgloss.JoinVertical(
 			lipgloss.Center,
 			m.spinner.View(),
-			m.style.Text.Render("Wait. Kubernetes launches"),
+			m.style.Text.Render(m.text),
 		),
 	)
 }

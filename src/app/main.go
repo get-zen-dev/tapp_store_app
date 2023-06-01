@@ -36,7 +36,7 @@ func main() {
 		w := view.NewModelWaiting(
 			func() error {
 				return clientMicrok8s.Start()
-			})
+			}, view.KubernetesLaunch)
 		p := tea.NewProgram(w, tea.WithAltScreen())
 		if _, err := p.Run(); err != nil {
 			printErr(err)
