@@ -62,7 +62,7 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	domen, _          = env.ReadFromConfig("app.env", "domen")
+	domen, _          = env.ReadFromConfig("app.yaml", "domen")
 	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
 
 	initStyle = style.InitStyles(*theme.DefaultTheme)
@@ -115,14 +115,14 @@ type Model struct {
 func NewModelTable() (*Model, error) {
 	e := requests.DownloadInfoAddons()
 	if e != nil {
-		return nil, e
+		panic(e)
 	}
 	models := env.ReadInfoAddonsModels()
 	items := NewItems()
 	for _, v := range models.Value() {
 		status, curVersion, err := getStatusAndCurVersion(v)
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
 		items.Append(&Item{
 			Title:          v.Name,
@@ -215,12 +215,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keys.Quit):
-			go func(clientMicrok8s k8.KuberInterface) {
+			go func() {
 				err := clientMicrok8s.Stop()
 				if err != nil {
 					panic(err)
 				}
-			}(clientMicrok8s)
+			}()
 			return m, tea.Quit
 		case key.Matches(msg, constants.Keys.Up):
 			m.table.PrevItem()

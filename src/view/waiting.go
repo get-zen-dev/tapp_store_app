@@ -46,7 +46,7 @@ func (m Waiting) Init() tea.Cmd {
 	return m.spinner.Tick
 }
 
-type Answer struct {
+type Next struct {
 	value error
 }
 
@@ -58,7 +58,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case errMsg:
 		m.err = msg
 		return m, nil
-	case Answer:
+	case Next:
 		if msg.value != nil {
 			panic(msg.value)
 		}
@@ -82,7 +82,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 	if !m.sent {
 		fn := func() tea.Msg {
-			return Answer{m.command()}
+			return Next{m.command()}
 		}
 		cmds = append(cmds, fn)
 		m.sent = true
@@ -92,7 +92,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Waiting) View() string {
 	if m.err != nil {
-		return m.err.Error()
+		panic(m.err.Error())
 	}
 	return lipgloss.Place(
 		m.width,
