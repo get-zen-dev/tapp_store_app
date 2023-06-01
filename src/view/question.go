@@ -13,7 +13,7 @@ type QuestionConcrete struct {
 	question shortQuestion.Question
 }
 
-func NewQuestion() (*QuestionConcrete, error) {
+func NewModelQuestion() (*QuestionConcrete, error) {
 	m := QuestionConcrete{shortQuestion.NewQuestionConcreteDomen()}
 	return &m, nil
 }

@@ -112,7 +112,7 @@ type Model struct {
 	lastError string
 }
 
-func NewModel() (*Model, error) {
+func NewModelTable() (*Model, error) {
 	e := requests.DownloadInfoAddons()
 	if e != nil {
 		return nil, e

@@ -27,14 +27,6 @@ type Styles struct {
 		HeaderStyle              lipgloss.Style
 		RowStyle                 lipgloss.Style
 	}
-
-	Section struct {
-		ContainerPadding int
-		ContainerStyle   lipgloss.Style
-		SpinnerStyle     lipgloss.Style
-		EmptyStateStyle  lipgloss.Style
-		KeyStyle         lipgloss.Style
-	}
 }
 
 func InitStyles(theme theme.Theme) Styles {
@@ -53,18 +45,6 @@ func InitStyles(theme theme.Theme) Styles {
 		ShortKey:       s.Help.KeyText.Copy(),
 		Ellipsis:       s.Help.Text.Copy(),
 	}
-
-	s.Section.ContainerPadding = 1
-	s.Section.ContainerStyle = lipgloss.NewStyle().Padding(0, s.Section.ContainerPadding)
-	s.Section.SpinnerStyle = lipgloss.NewStyle().Padding(0, 1)
-	s.Section.EmptyStateStyle = lipgloss.NewStyle().
-		Faint(true).
-		PaddingLeft(1).
-		MarginBottom(1)
-	s.Section.KeyStyle = lipgloss.NewStyle().
-		Foreground(theme.PrimaryText).
-		Background(theme.SelectedBackground).
-		Padding(0, 1)
 
 	s.ListViewPort.PagerStyle = lipgloss.NewStyle().
 		Height(common.ListPagerHeight).
@@ -91,4 +71,20 @@ func InitStyles(theme theme.Theme) Styles {
 		BorderBottom(true)
 
 	return s
+}
+
+type StylesWaiting struct {
+	Spinner lipgloss.Style
+	Text    lipgloss.Style
+}
+
+func InitStylesWaiting(theme theme.Theme) StylesWaiting {
+	var style StylesWaiting
+	style.Spinner = lipgloss.NewStyle().
+		BorderStyle(lipgloss.HiddenBorder()).
+		Foreground(theme.SpinnerColor).
+		BorderBottom(true)
+	style.Text = lipgloss.NewStyle().
+		Foreground(theme.PrimaryText)
+	return style
 }
