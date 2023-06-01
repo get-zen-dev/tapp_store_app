@@ -30,20 +30,16 @@ func main() {
 		if _, err := p.Run(); err != nil {
 			printErr(err)
 		}
+	} else {
+		clientMicrok8s, err := k8.GetInterfaceProvider(domen)
+		printErrorIfNotNil(err)
+		w := view.NewModelWaiting(
+			func() error {
+				return clientMicrok8s.Start()
+			})
+		p := tea.NewProgram(w, tea.WithAltScreen())
+		if _, err := p.Run(); err != nil {
+			printErr(err)
+		}
 	}
-
-	clientMicrok8s, err := k8.GetInterfaceProvider(domen)
-	printErrorIfNotNil(err)
-	w := view.NewModelWaiting(
-		func() bool {
-			err = clientMicrok8s.Start()
-			return err == nil
-		})
-	p := tea.NewProgram(w, tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		printErr(err)
-	}
-	defer func(clientMicrok8s k8.KuberInterface) {
-		printErrorIfNotNil(clientMicrok8s.Stop())
-	}(clientMicrok8s)
 }

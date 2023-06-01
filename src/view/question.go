@@ -37,7 +37,13 @@ func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			domen := m.question.Input().Value()
 			env.WriteInConfig("app.env", "domen", domen)
 			m.question.SetAnswered(true)
-			return m, m.question.Input().Blur
+			next := NewModelWaiting(
+				func() error {
+					return clientMicrok8s.Start()
+				})
+			next.width = m.question.GetDimensions().Width
+			next.height = m.question.GetDimensions().Height
+			return next, next.spinner.Tick
 		}
 	}
 	return m, m.question.Update(msg)

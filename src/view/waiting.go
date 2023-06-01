@@ -1,6 +1,7 @@
 package view
 
 import (
+	"constants"
 	"style"
 	"theme"
 	"time"
@@ -20,7 +21,7 @@ type Waiting struct {
 	quitting bool
 	sent     bool
 	err      error
-	command  func() bool
+	command  func() error
 }
 
 var points = spinner.Spinner{
@@ -28,7 +29,7 @@ var points = spinner.Spinner{
 	FPS:    time.Second / 7,
 }
 
-func NewModelWaiting(fn func() bool) Waiting {
+func NewModelWaiting(fn func() error) Waiting {
 	spin := spinner.New()
 	spin.Spinner = points
 	s := style.InitStylesWaiting(*theme.DefaultTheme)
@@ -41,7 +42,7 @@ func (m Waiting) Init() tea.Cmd {
 }
 
 type Answer struct {
-	value bool
+	value error
 }
 
 func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -53,8 +54,14 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.err = msg
 		return m, nil
 	case Answer:
-		kub, _ := NewModelTable()
-		return kub.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+		if msg.value != nil {
+			panic(msg.value)
+		}
+		next, _ := NewModelTable()
+		next.help.Width = m.width
+		next.table.SetDimensions(constants.Dimensions{Width: m.width, Height: m.height - constants.Keys.HeightShort - HeightMessage})
+		next.table.SyncViewPortContent()
+		return next, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":

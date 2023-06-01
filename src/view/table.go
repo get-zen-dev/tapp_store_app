@@ -215,6 +215,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keys.Quit):
+			go func(clientMicrok8s k8.KuberInterface) {
+				err := clientMicrok8s.Stop()
+				if err != nil {
+					panic(err)
+				}
+			}(clientMicrok8s)
 			return m, tea.Quit
 		case key.Matches(msg, constants.Keys.Up):
 			m.table.PrevItem()
@@ -259,7 +265,7 @@ func (m *Model) View() string {
 	message := m.lastError
 	m.lastError = ""
 	if message == "" {
-		message = fmt.Sprintf("https::/%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domen)
+		message = fmt.Sprintf("https://%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domen)
 	}
 	return lipgloss.JoinVertical(lipgloss.Left,
 		m.table.View(),
