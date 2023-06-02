@@ -2,14 +2,14 @@ package view
 
 import (
 	"constants"
+	"github.com/charmbracelet/bubbles/spinner"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	he "handleException"
 	k8 "k8sinterface"
 	"style"
 	"theme"
 	"time"
-
-	"github.com/charmbracelet/bubbles/spinner"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 var (
@@ -60,9 +60,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.err = msg
 		return m, nil
 	case Next:
-		if msg.value != nil {
-			panic(msg.value)
-		}
+		he.PrintErrorIfNotNil(msg.value)
 		next, _ := NewModelTable(m.clientMicrok8s)
 		next.help.Width = m.width
 		next.table.SetDimensions(constants.Dimensions{Width: m.width, Height: m.height - constants.Keys.HeightShort - HeightMessage})
@@ -95,9 +93,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Waiting) View() string {
-	if m.err != nil {
-		panic(m.err.Error())
-	}
+	he.PrintErrorIfNotNil(m.err)
 	return lipgloss.Place(
 		m.width,
 		m.height,

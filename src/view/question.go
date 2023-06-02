@@ -26,9 +26,6 @@ func (m QuestionConcrete) Init() tea.Cmd {
 }
 
 func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.question.Answered() {
-		return m, tea.Quit
-	}
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.question.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height})
@@ -40,7 +37,6 @@ func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			domain := m.question.Input().Value()
 			env.WriteInConfig("app.yaml", "domain", domain)
 			env.GetDomain()
-			m.question.SetAnswered(true)
 			client, _ := k8.GetInterfaceProvider(domain)
 			next := NewModelWaiting(client, KubernetesLaunch)
 			next.width = m.question.GetDimensions().Width

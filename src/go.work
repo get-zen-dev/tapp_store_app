@@ -13,4 +13,5 @@ use (
 	./components/listviewport
 	./components/table
 	./components/question
+	./handleException
 )

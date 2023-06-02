@@ -4,6 +4,7 @@ import (
 	"constants"
 	env "environment"
 	"errors"
+	he "handleException"
 	k8 "k8sinterface"
 	"requests"
 	"style"
@@ -110,10 +111,7 @@ type Model struct {
 }
 
 func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
-	e := requests.DownloadInfoAddons()
-	if e != nil {
-		panic(e)
-	}
+	requests.DownloadInfoAddons()
 	m := Model{}
 	m.clientMicrok8s = clientMicrok8s
 	models := env.ReadInfoAddonsModels()
@@ -121,9 +119,7 @@ func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
 	urls := []string{}
 	for _, v := range models.Value() {
 		status, curVersion, err := m.getStatusAndCurVersion(v)
-		if err != nil {
-			panic(err)
-		}
+		he.PrintErrorIfNotNil(err)
 		items.Append(&Item{
 			Title:          v.Name,
 			Status:         status,
@@ -222,10 +218,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, constants.Keys.Quit):
 			go func() {
-				err := m.clientMicrok8s.Stop()
-				if err != nil {
-					panic(err)
-				}
+				he.PrintErrorIfNotNil(m.clientMicrok8s.Stop())
 			}()
 			return m, tea.Quit
 		case key.Matches(msg, constants.Keys.Up):

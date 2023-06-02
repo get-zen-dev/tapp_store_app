@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/viper"
+	he "handleException"
 )
 
 var (
@@ -77,7 +78,7 @@ func initViper(file string) *viper.Viper {
 	err := v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(*os.PathError); !ok {
-			panic(err)
+			he.PrintErr(err)
 		}
 	}
 	return v
@@ -117,7 +118,8 @@ func ReadInfoAddonsSlice() *[]map[string]string {
 	viper.SetConfigFile("./../configs/addons.yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	slice := []map[string]string{}
 	viper.UnmarshalKey("microk8s-addons.addons", &slice)
