@@ -2,6 +2,7 @@ package view
 
 import (
 	"constants"
+	k8 "k8sinterface"
 	"style"
 	"theme"
 	"time"
@@ -18,15 +19,15 @@ var (
 type errMsg error
 
 type Waiting struct {
-	spinner  spinner.Model
-	style    style.StylesWaiting
-	text     string
-	width    int
-	height   int
-	quitting bool
-	sent     bool
-	err      error
-	command  func() error
+	spinner        spinner.Model
+	style          style.StylesWaiting
+	text           string
+	width          int
+	height         int
+	quitting       bool
+	sent           bool
+	err            error
+	clientMicrok8s k8.KuberInterface
 }
 
 var points = spinner.Spinner{
@@ -34,12 +35,12 @@ var points = spinner.Spinner{
 	FPS:    time.Second / 7,
 }
 
-func NewModelWaiting(fn func() error, text string) Waiting {
+func NewModelWaiting(clientMicrok8s k8.KuberInterface, text string) Waiting {
 	spin := spinner.New()
 	spin.Spinner = points
 	s := style.InitStylesWaiting(*theme.DefaultTheme)
 	spin.Style = s.Spinner
-	return Waiting{spinner: spin, style: s, text: text, command: fn}
+	return Waiting{spinner: spin, style: s, text: text, clientMicrok8s: clientMicrok8s}
 }
 
 func (m Waiting) Init() tea.Cmd {
@@ -62,7 +63,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.value != nil {
 			panic(msg.value)
 		}
-		next, _ := NewModelTable()
+		next, _ := NewModelTable(m.clientMicrok8s)
 		next.help.Width = m.width
 		next.table.SetDimensions(constants.Dimensions{Width: m.width, Height: m.height - constants.Keys.HeightShort - HeightMessage})
 		next.table.SyncViewPortContent()
@@ -82,7 +83,10 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 	if !m.sent {
 		fn := func() tea.Msg {
-			return Next{m.command()}
+			command := func() error {
+				return m.clientMicrok8s.Start()
+			}
+			return Next{command()}
 		}
 		cmds = append(cmds, fn)
 		m.sent = true

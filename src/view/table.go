@@ -61,9 +61,6 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	domain, _         = env.GetDomain()
-	clientMicrok8s, _ = k8.GetInterfaceProvider(domain)
-
 	initStyle = style.InitStyles(*theme.DefaultTheme)
 
 	emptyState = "not found"
@@ -104,23 +101,26 @@ func (i *Items) GetItems() []table.Row {
 }
 
 type Model struct {
-	table     table.Model
-	urls      []string
-	style     *style.Styles
-	help      help.Model
-	lastError string
+	table          table.Model
+	urls           []string
+	style          *style.Styles
+	help           help.Model
+	lastError      string
+	clientMicrok8s k8.KuberInterface
 }
 
-func NewModelTable() (*Model, error) {
+func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
 	e := requests.DownloadInfoAddons()
 	if e != nil {
 		panic(e)
 	}
+	m := Model{}
+	m.clientMicrok8s = clientMicrok8s
 	models := env.ReadInfoAddonsModels()
 	items := NewItems()
 	urls := []string{}
 	for _, v := range models.Value() {
-		status, curVersion, err := getStatusAndCurVersion(v)
+		status, curVersion, err := m.getStatusAndCurVersion(v)
 		if err != nil {
 			panic(err)
 		}
@@ -133,22 +133,20 @@ func NewModelTable() (*Model, error) {
 		url := clientMicrok8s.GetModuleUrl(v.Name)
 		urls = append(urls, url.String())
 	}
-	m := Model{
-		table: table.NewModel(initStyle,
-			constants.Dimensions{Width: MinWidth, Height: MinHeight},
-			headers,
-			items.GetItems(),
-			&emptyState),
-		urls:      urls,
-		style:     &initStyle,
-		help:      help.New(),
-		lastError: "",
-	}
+	m.table = table.NewModel(initStyle,
+		constants.Dimensions{Width: MinWidth, Height: MinHeight},
+		headers,
+		items.GetItems(),
+		&emptyState)
+	m.urls = urls
+	m.style = &initStyle
+	m.help = help.New()
+	m.lastError = ""
 	return &m, nil
 }
 
-func getStatusAndCurVersion(v env.Model) (string, string, error) {
-	info, err := clientMicrok8s.GetCachedModuleInfo(v.Name)
+func (m *Model) getStatusAndCurVersion(v env.Model) (string, string, error) {
+	info, err := m.clientMicrok8s.GetCachedModuleInfo(v.Name)
 	if err != nil {
 		return "", "", err
 	}
@@ -165,13 +163,13 @@ func getStatusAndCurVersion(v env.Model) (string, string, error) {
 }
 
 func (m *Model) updateStatus() error {
-	err := clientMicrok8s.RefreshInfoCache()
+	err := m.clientMicrok8s.RefreshInfoCache()
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(m.table.Rows); i++ {
 		title := m.table.Rows[i][Title]
-		info, err := clientMicrok8s.GetCachedModuleInfo(title)
+		info, err := m.clientMicrok8s.GetCachedModuleInfo(title)
 		if err != nil {
 			return err
 		}
@@ -224,7 +222,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, constants.Keys.Quit):
 			go func() {
-				err := clientMicrok8s.Stop()
+				err := m.clientMicrok8s.Stop()
 				if err != nil {
 					panic(err)
 				}
@@ -238,7 +236,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			index := m.table.GetCurrItem()
 			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
-				_, errFst := clientMicrok8s.InstallModule(name)
+				_, errFst := m.clientMicrok8s.InstallModule(name)
 				errSnd := m.updateStatus()
 				var err error = nil
 				if errFst != nil || errSnd != nil {
@@ -250,15 +248,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			index := m.table.GetCurrItem()
 			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
-				return Delete{index, clientMicrok8s.RemoveModule(name)}
+				return Delete{index, m.clientMicrok8s.RemoveModule(name)}
 			}
 		case key.Matches(msg, constants.Keys.Update):
 			index := m.table.GetCurrItem()
 			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
 				if m.table.Rows[index][Version] != m.table.Rows[index][CurrentVersion] {
-					clientMicrok8s.RemoveModule(name)
-					clientMicrok8s.InstallModule(name)
+					m.clientMicrok8s.RemoveModule(name)
+					m.clientMicrok8s.InstallModule(name)
 					return Install{index, nil}
 				}
 				return nil

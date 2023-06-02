@@ -2,9 +2,11 @@ package view
 
 import (
 	"constants"
+	k8 "k8sinterface"
 	"shortQuestion"
 
 	env "environment"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -38,10 +40,8 @@ func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			env.WriteInConfig("app.yaml", "domain", domain)
 			env.GetDomain()
 			m.question.SetAnswered(true)
-			next := NewModelWaiting(
-				func() error {
-					return clientMicrok8s.Start()
-				}, KubernetesLaunch)
+			client, _ := k8.GetInterfaceProvider(domain)
+			next := NewModelWaiting(client, KubernetesLaunch)
 			next.width = m.question.GetDimensions().Width
 			next.height = m.question.GetDimensions().Height
 			return next, next.spinner.Tick
