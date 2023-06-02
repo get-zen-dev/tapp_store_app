@@ -47,6 +47,7 @@ func GetDomain() (string, error) {
 	return domainRead, err
 }
 
+// Returns the installed version of the addon by name
 func ReadFromConfigCurrentVersion(key string) (string, error) {
 	if currentVersions == nil {
 		currentVersions = initViper("current_version.yaml")
@@ -60,6 +61,7 @@ func ReadFromConfigCurrentVersion(key string) (string, error) {
 	}
 }
 
+// Writes the addon version by name
 func WriteInConfigCurrentVersion(key, value string) error {
 	if currentVersions == nil {
 		currentVersions = initViper("current_version.yaml")

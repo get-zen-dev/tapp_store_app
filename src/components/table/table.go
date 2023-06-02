@@ -8,14 +8,18 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// Column in a table
 type Column struct {
 	Title    string
 	Width    int
 	MinWidth int
 	Flex     int
 }
+
+// Row to table
 type Row []string
 
+// Table Model
 type Model struct {
 	style         style.Styles
 	Columns       []Column
@@ -26,6 +30,7 @@ type Model struct {
 	rowsViewport  listviewport.Model
 }
 
+// Create a new table model
 func NewModel(style style.Styles, dimensions constants.Dimensions, columns []Column, rows []Row, emptyState *string) Model {
 	return Model{
 		style:         style,
@@ -37,12 +42,14 @@ func NewModel(style style.Styles, dimensions constants.Dimensions, columns []Col
 	}
 }
 
+// Returns a string to print to the console
 func (m Model) View() string {
 	header := m.renderHeader()
 	body := m.renderBody()
 	return lipgloss.JoinVertical(lipgloss.Left, header, body)
 }
 
+// Set dimensions for the table
 func (m *Model) SetDimensions(dimensions constants.Dimensions) {
 	m.dimensions = constants.Dimensions{Width: listviewport.Max(m.minDimensions.Width, dimensions.Width),
 		Height: listviewport.Max(m.minDimensions.Height, dimensions.Height)}
@@ -56,10 +63,12 @@ func (m *Model) ResetCurrItem() {
 	m.rowsViewport.ResetCurrItem()
 }
 
+// Returns the index of the current row
 func (m *Model) GetCurrItem() int {
 	return m.rowsViewport.GetCurrItem()
 }
 
+// Move index to previous row
 func (m *Model) PrevItem() int {
 	currItem := m.rowsViewport.PrevItem()
 	m.SyncViewPortContent()
@@ -67,6 +76,7 @@ func (m *Model) PrevItem() int {
 	return currItem
 }
 
+// Move index to next row
 func (m *Model) NextItem() int {
 	currItem := m.rowsViewport.NextItem()
 	m.SyncViewPortContent()
@@ -88,6 +98,7 @@ func (m *Model) LastItem() int {
 	return currItem
 }
 
+// Synchronizes the contents of the model for listviewport
 func (m *Model) SyncViewPortContent() {
 	headerColumns := m.renderHeaderColumns()
 	renderedRows := make([]string, 0, len(m.Rows))

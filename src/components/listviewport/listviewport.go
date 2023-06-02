@@ -9,6 +9,7 @@ import (
 	"style"
 )
 
+// Model for controlling the cursor in the table and for displaying the table
 type Model struct {
 	style           style.Styles
 	viewport        viewport.Model
@@ -20,6 +21,7 @@ type Model struct {
 	NumTotalItems   int
 }
 
+// Returns new model
 func NewModel(styles style.Styles, dimensions constants.Dimensions, numItems, listItemHeight int) Model {
 	model := Model{
 		style:           styles,
@@ -45,6 +47,7 @@ func (m *Model) SetTotalItems(total int) {
 	m.NumTotalItems = total
 }
 
+// Synchronizes the contents of the model for rendering
 func (m *Model) SyncViewPort(content string) {
 	m.viewport.SetContent(content)
 }
@@ -106,6 +109,7 @@ func (m *Model) SetDimensions(dimensions constants.Dimensions) {
 	m.viewport.SetYOffset(m.currId*m.ListItemHeight - m.getNumPrsPerPage())
 }
 
+// Returns a string to be printed to the console
 func (m *Model) View() string {
 	pagerContent := ""
 	if m.NumTotalItems > 0 {
@@ -127,6 +131,7 @@ func (m *Model) View() string {
 		))
 }
 
+// Updates the table style
 func (m *Model) UpdateStyle(style *style.Styles) {
 	m.style = *style
 }

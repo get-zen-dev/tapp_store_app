@@ -6,6 +6,7 @@ import (
 
 const ctrlc = "ctrl+c"
 
+// Component for managing keyboard shortcuts
 type KeyMap struct {
 	Up            key.Binding
 	Down          key.Binding
@@ -23,10 +24,12 @@ type KeyMap struct {
 	HeightFull    int
 }
 
+// Returns mini help view that automatically generates itself from your KeyMap
 func (k KeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{k.Up, k.Down, k.Install, k.Delete, k.Update}
 }
 
+// Returns full help view that automatically generates itself from your KeyMap
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.FirstItem, k.LastItem},
@@ -34,6 +37,7 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 	}
 }
 
+// Vertical and horizontal dimensions
 type Dimensions struct {
 	Width  int
 	Height int

@@ -11,6 +11,7 @@ import (
 
 const PART_WINDOW = 3
 
+// Model to hold the question and as well as the input text field
 type Question struct {
 	question   string
 	answer     string
@@ -20,6 +21,8 @@ type Question struct {
 	answered   bool
 }
 
+// Returns the question, a text input field that will be printed to 
+// the console
 func (q *Question) View() string {
 	return lipgloss.Place(
 		q.dimensions.Width,
@@ -58,6 +61,7 @@ func (q *Question) Input() *Input {
 	return &q.input
 }
 
+// Creates a new question model
 func NewQuestion(question, placeholder string, style style.StylesQuestion) Question {
 	q := Question{question: question, answered: false}
 	q.input = newInput(placeholder)
@@ -66,10 +70,12 @@ func NewQuestion(question, placeholder string, style style.StylesQuestion) Quest
 	return q
 }
 
+// Input for text
 type Input struct {
 	textinput textinput.Model
 }
 
+// Creates a new input for text
 func newInput(placeholder string) Input {
 	msg := textinput.New()
 	msg.Placeholder = placeholder
@@ -77,6 +83,7 @@ func newInput(placeholder string) Input {
 	return Input{msg}
 }
 
+// Get input content
 func (in *Input) Value() string {
 	return in.textinput.Value()
 }
@@ -85,12 +92,14 @@ func (in *Input) Blur() tea.Msg {
 	return in.textinput.Blur
 }
 
+// Update content of input
 func (in *Input) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	in.textinput, cmd = in.textinput.Update(msg)
 	return cmd
 }
 
+// Returns a string to be printed to the console
 func (in *Input) View() string {
 	return in.textinput.View()
 }
