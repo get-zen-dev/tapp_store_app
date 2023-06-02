@@ -62,11 +62,11 @@ func (m *microk8sClient) GetCachedModuleInfo(name string) (*ModuleInfo, error) {
 	status := m.currentStatusCache
 	_, enableAndDisable, find := strings.Cut(status, "  enabled:")
 	if !find {
-		return nil, errors.New(name + ": enable modules not found")
+		return nil, errors.New("enable modules not found")
 	}
 	enable, disable, find := strings.Cut(enableAndDisable, "  disabled:")
 	if !find {
-		return nil, errors.New(name + ": disabled modules not found")
+		return nil, errors.New("disabled modules not found")
 	}
 
 	isEnabled := strings.Index(enable, name)
