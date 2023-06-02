@@ -21,7 +21,10 @@ func (m *microk8sClient) Start() error {
 			return err
 		}
 	} else if !checkSetupRepositoryOfAddons() {
-		setupRepositoryOfAddons()
+		err := setupRepositoryOfAddons()
+		if err != nil {
+			return err
+		}
 	}
 
 	return invokeCommand(commandCore, "start")
