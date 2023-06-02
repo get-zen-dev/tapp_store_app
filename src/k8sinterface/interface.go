@@ -20,7 +20,7 @@ type KuberInterface interface {
 	RemoveModule(name string) error
 	GetCachedModuleInfo(name string) (*ModuleInfo, error)
 	RefreshInfoCache() error
-	GetModuleUrl(name string) (url.URL, error)
+	GetModuleUrl(name string) url.URL
 }
 
 func GetInterfaceProvider(domain string) (KuberInterface, error) {

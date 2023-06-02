@@ -4,7 +4,6 @@ import (
 	"constants"
 	env "environment"
 	"errors"
-	"fmt"
 	k8 "k8sinterface"
 	"requests"
 	"style"
@@ -106,6 +105,7 @@ func (i *Items) GetItems() []table.Row {
 
 type Model struct {
 	table     table.Model
+	urls      []string
 	style     *style.Styles
 	help      help.Model
 	lastError string
@@ -118,6 +118,7 @@ func NewModelTable() (*Model, error) {
 	}
 	models := env.ReadInfoAddonsModels()
 	items := NewItems()
+	urls := []string{}
 	for _, v := range models.Value() {
 		status, curVersion, err := getStatusAndCurVersion(v)
 		if err != nil {
@@ -129,6 +130,8 @@ func NewModelTable() (*Model, error) {
 			Version:        v.Version,
 			CurrentVersion: curVersion,
 			Description:    v.Description})
+		url := clientMicrok8s.GetModuleUrl(v.Name)
+		urls = append(urls, url.String())
 	}
 	m := Model{
 		table: table.NewModel(initStyle,
@@ -136,6 +139,7 @@ func NewModelTable() (*Model, error) {
 			headers,
 			items.GetItems(),
 			&emptyState),
+		urls:      urls,
 		style:     &initStyle,
 		help:      help.New(),
 		lastError: "",
@@ -268,7 +272,7 @@ func (m *Model) View() string {
 	message := m.lastError
 	m.lastError = ""
 	if message == "" {
-		message = fmt.Sprintf("https://%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domain)
+		message = m.urls[m.table.GetCurrItem()]
 	}
 	return lipgloss.JoinVertical(lipgloss.Left,
 		m.table.View(),
