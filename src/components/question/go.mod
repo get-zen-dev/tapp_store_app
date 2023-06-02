@@ -1,4 +1,4 @@
-module shortQuestion
+module question
 
 go 1.20
 

@@ -12,5 +12,5 @@ use (
 	./components/style
 	./components/listviewport
 	./components/table
-	./components/shortQuestion
+	./components/question
 )

@@ -3,7 +3,7 @@ package view
 import (
 	"constants"
 	k8 "k8sinterface"
-	"shortQuestion"
+	"question"
 
 	env "environment"
 
@@ -12,11 +12,11 @@ import (
 )
 
 type QuestionConcrete struct {
-	question shortQuestion.Question
+	question question.Question
 }
 
 func NewModelQuestion() (*QuestionConcrete, error) {
-	m := QuestionConcrete{shortQuestion.NewQuestionConcreteDomain()}
+	m := QuestionConcrete{question.NewQuestionConcreteDomain()}
 	return &m, nil
 }
 

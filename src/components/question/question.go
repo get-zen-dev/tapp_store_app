@@ -1,4 +1,4 @@
-package shortQuestion
+package question
 
 import (
 	"constants"
