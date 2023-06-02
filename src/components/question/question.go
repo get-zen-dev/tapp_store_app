@@ -2,23 +2,20 @@ package question
 
 import (
 	"constants"
+	"style"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
-const (
-	QUESTION    = "What is your dns?"
-	PLACEHOLDER = "salatik.com"
-
-	PART_WINDOW = 3
-)
+const PART_WINDOW = 3
 
 type Question struct {
 	question   string
 	answer     string
 	input      Input
-	style      Styles
+	style      style.StylesQuestion
 	dimensions constants.Dimensions
 	answered   bool
 }
@@ -61,26 +58,10 @@ func (q *Question) Input() *Input {
 	return &q.input
 }
 
-type Styles struct {
-	BorderColor lipgloss.AdaptiveColor
-	InputField  lipgloss.Style
-}
-
-func DefaultStyles() Styles {
-	s := Styles{}
-	s.BorderColor = lipgloss.AdaptiveColor{Light: "006", Dark: "36"}
-	s.InputField = lipgloss.NewStyle().BorderForeground(s.BorderColor).BorderStyle(lipgloss.NormalBorder()).Padding(1)
-	return s
-}
-
-func NewQuestionConcreteDomain() Question {
-	return NewQuestion(QUESTION, PLACEHOLDER)
-}
-
-func NewQuestion(question, placeholder string) Question {
+func NewQuestion(question, placeholder string, style style.StylesQuestion) Question {
 	q := Question{question: question, answered: false}
 	q.input = newInput(placeholder)
-	q.style = DefaultStyles()
+	q.style = style
 	q.dimensions = constants.Dimensions{Width: 80, Height: 50}
 	return q
 }

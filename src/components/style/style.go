@@ -87,3 +87,15 @@ func InitStylesWaiting(theme theme.Theme) StylesWaiting {
 		Foreground(theme.PrimaryText)
 	return style
 }
+
+type StylesQuestion struct {
+	BorderColor lipgloss.AdaptiveColor
+	InputField  lipgloss.Style
+}
+
+func InitStylesQuestion() StylesQuestion {
+	s := StylesQuestion{}
+	s.BorderColor = lipgloss.AdaptiveColor{Light: "006", Dark: "36"}
+	s.InputField = lipgloss.NewStyle().BorderForeground(s.BorderColor).BorderStyle(lipgloss.NormalBorder()).Padding(1)
+	return s
+}
