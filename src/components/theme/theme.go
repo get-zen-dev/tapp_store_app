@@ -9,6 +9,7 @@ type Theme struct {
 	SpinnerColor       lipgloss.AdaptiveColor
 	PrimaryBorder      lipgloss.AdaptiveColor
 	FaintBorder        lipgloss.AdaptiveColor
+	BorderColor        lipgloss.AdaptiveColor
 	SecondaryBorder    lipgloss.AdaptiveColor
 	FaintText          lipgloss.AdaptiveColor
 	PrimaryText        lipgloss.AdaptiveColor
@@ -23,6 +24,7 @@ var DefaultTheme = &Theme{
 	SecondaryBorder:    lipgloss.AdaptiveColor{Light: "008", Dark: "007"},
 	SelectedBackground: lipgloss.AdaptiveColor{Light: "006", Dark: "#4B0082"},
 	SpinnerColor:       lipgloss.AdaptiveColor{Light: "006", Dark: "#4B0082"},
+	BorderColor:        lipgloss.AdaptiveColor{Light: "006", Dark: "36"},
 	FaintBorder:        lipgloss.AdaptiveColor{Light: "254", Dark: "000"},
 	PrimaryText:        lipgloss.AdaptiveColor{Light: "000", Dark: "015"},
 	SecondaryText:      lipgloss.AdaptiveColor{Light: "244", Dark: "251"},

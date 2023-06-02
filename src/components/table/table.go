@@ -1,7 +1,6 @@
 package table
 
 import (
-	"common"
 	"constants"
 	"listviewport"
 	"style"
@@ -152,8 +151,8 @@ func (m *Model) renderHeader() string {
 	return m.style.Table.HeaderStyle.Copy().
 		Width(m.dimensions.Width).
 		MaxWidth(m.dimensions.Width).
-		Height(common.TableHeaderHeight).
-		MaxHeight(common.TableHeaderHeight).
+		Height(style.TableHeaderHeight).
+		MaxHeight(style.TableHeaderHeight).
 		Render(header)
 }
 

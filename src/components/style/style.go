@@ -1,14 +1,36 @@
 package style
 
 import (
-	"common"
 	bbHelp "github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/lipgloss"
 	"theme"
 )
 
+var (
+	HeaderHeight       = 2
+	FooterHeight       = 2
+	TableHeaderHeight  = 2
+	ListPagerHeight    = 2
+)
+
+type CommonStyles struct {
+	FooterStyle   lipgloss.Style
+}
+
+func BuildStyles(theme theme.Theme) CommonStyles {
+	var s CommonStyles
+
+	s.FooterStyle = lipgloss.NewStyle().
+		Height(FooterHeight - 1).
+		BorderTop(true).
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(theme.PrimaryBorder)
+
+	return s
+}
+
 type Styles struct {
-	Common common.CommonStyles
+	Common CommonStyles
 
 	Help struct {
 		Text         lipgloss.Style
@@ -32,7 +54,7 @@ type Styles struct {
 func InitStyles(theme theme.Theme) Styles {
 	var s Styles
 
-	s.Common = common.BuildStyles(theme)
+	s.Common = BuildStyles(theme)
 
 	s.Help.Text = lipgloss.NewStyle().Foreground(theme.SecondaryText)
 	s.Help.KeyText = lipgloss.NewStyle().Foreground(theme.PrimaryText)
@@ -47,8 +69,8 @@ func InitStyles(theme theme.Theme) Styles {
 	}
 
 	s.ListViewPort.PagerStyle = lipgloss.NewStyle().
-		Height(common.ListPagerHeight).
-		MaxHeight(common.ListPagerHeight).
+		Height(ListPagerHeight).
+		MaxHeight(ListPagerHeight).
 		PaddingTop(1).
 		Foreground(theme.FaintText)
 
@@ -93,9 +115,9 @@ type StylesQuestion struct {
 	InputField  lipgloss.Style
 }
 
-func InitStylesQuestion() StylesQuestion {
+func InitStylesQuestion(theme theme.Theme) StylesQuestion {
 	s := StylesQuestion{}
-	s.BorderColor = lipgloss.AdaptiveColor{Light: "006", Dark: "36"}
+	s.BorderColor = theme.BorderColor
 	s.InputField = lipgloss.NewStyle().BorderForeground(s.BorderColor).BorderStyle(lipgloss.NormalBorder()).Padding(1)
 	return s
 }

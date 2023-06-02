@@ -5,6 +5,7 @@ import (
 	k8 "k8sinterface"
 	"question"
 	"style"
+	"theme"
 
 	env "environment"
 
@@ -17,7 +18,7 @@ type QuestionConcrete struct {
 }
 
 func NewModelQuestion() (*QuestionConcrete, error) {
-	m := QuestionConcrete{question.NewQuestion("What is your dns?", "salatik.com", style.InitStylesQuestion())}
+	m := QuestionConcrete{question.NewQuestion("What is your dns?", "salatik.com", style.InitStylesQuestion(*theme.DefaultTheme))}
 	return &m, nil
 }
 

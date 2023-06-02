@@ -1,7 +1,6 @@
 package listviewport
 
 import (
-	"common"
 	"constants"
 	"fmt"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -21,14 +20,15 @@ type Model struct {
 	NumTotalItems   int
 }
 
-func NewModel(style style.Styles, dimensions constants.Dimensions, numItems, listItemHeight int) Model {
+func NewModel(styles style.Styles, dimensions constants.Dimensions, numItems, listItemHeight int) Model {
 	model := Model{
+		style:           styles,
 		NumCurrentItems: numItems,
 		ListItemHeight:  listItemHeight,
 		currId:          0,
 		viewport: viewport.Model{
 			Width:  dimensions.Width,
-			Height: dimensions.Height - common.ListPagerHeight - common.HeaderHeight,
+			Height: dimensions.Height - style.ListPagerHeight - style.HeaderHeight,
 		},
 		topBoundId: 0,
 	}
@@ -101,7 +101,7 @@ func (m *Model) LastItem() int {
 }
 
 func (m *Model) SetDimensions(dimensions constants.Dimensions) {
-	m.viewport.Height = dimensions.Height - common.ListPagerHeight - common.HeaderHeight
+	m.viewport.Height = dimensions.Height - style.ListPagerHeight - style.HeaderHeight
 	m.viewport.Width = dimensions.Width
 	m.viewport.SetYOffset(m.currId*m.ListItemHeight - m.getNumPrsPerPage())
 }
