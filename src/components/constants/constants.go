@@ -4,6 +4,8 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 )
 
+const ctrlc = "ctrl+c"
+
 type KeyMap struct {
 	Up            key.Binding
 	Down          key.Binding
@@ -71,12 +73,12 @@ var Keys = KeyMap{
 		key.WithHelp("?", "toggle help"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
+		key.WithKeys("q", ctrlc),
 		key.WithHelp("q", "quit"),
 	),
 	QuitWithoutQ: key.NewBinding(
-		key.WithKeys("ctrl+c"),
-		key.WithHelp("ctrl+c", "quit"),
+		key.WithKeys(ctrlc),
+		key.WithHelp(ctrlc, "quit"),
 	),
 	Enter: key.NewBinding(
 		key.WithKeys("enter"),
