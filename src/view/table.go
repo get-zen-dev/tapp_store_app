@@ -67,7 +67,6 @@ var (
 
 	initStyle = style.InitStyles(*theme.DefaultTheme)
 
-	currentVersion = "current_version.yaml"
 	emptyState     = "not found"
 )
 
@@ -149,7 +148,7 @@ func getStatusAndCurVersion(v env.Model) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	curVersion, _ := env.ReadFromConfig(currentVersion, v.Name)
+	curVersion, _ := env.ReadFromConfigCurrentVersion(v.Name)
 	if info.IsEnabled {
 		if v.Version == curVersion {
 			return Installed, curVersion, nil
@@ -172,11 +171,11 @@ func (m *Model) updateStatus() error {
 		if err != nil {
 			return err
 		}
-		curVersion, _ := env.ReadFromConfig(currentVersion, title)
+		curVersion, _ := env.ReadFromConfigCurrentVersion(title)
 		if info.IsEnabled && curVersion == "" {
 			m.table.Rows[i][Status] = Installed
 			version := m.table.Rows[i][Version]
-			env.WriteInConfig(currentVersion, title, version)
+			env.WriteInConfigCurrentVersion(title, version)
 			m.table.Rows[i][CurrentVersion] = version
 		}
 	}
@@ -213,7 +212,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.lastError = msg.err.Error()
 		} else {
 			m.table.Rows[msg.index][Status] = Deleted
-			env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
+			env.WriteInConfigCurrentVersion(m.table.Rows[msg.index][Title], "")
 			m.table.Rows[msg.index][CurrentVersion] = ""
 			m.table.SyncViewPortContent()
 		}

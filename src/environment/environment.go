@@ -8,11 +8,12 @@ import (
 )
 
 var (
-	owner      = "get-zen-dev"
-	repository = "tapp_store_rep"
-	path       = "addons"
-	ref        = "main"
-	domen      = ""
+	owner                        = "get-zen-dev"
+	repository                   = "tapp_store_rep"
+	path                         = "addons"
+	ref                          = "main"
+	domen                        = ""
+	currentVersions *viper.Viper = nil
 )
 
 // Returns the name of owner of the repository with addons
@@ -43,6 +44,31 @@ func GetDomen() (string, error) {
 	domenRead, err := ReadFromConfig("app.yaml", "domen")
 	domen = domenRead
 	return domenRead, err
+}
+
+func ReadFromConfigCurrentVersion(key string) (string, error) {
+	if currentVersions == nil {
+		currentVersions = initViper("current_version.yaml")
+	}
+	data := currentVersions.Get(key)
+	switch data.(type) {
+	case string:
+		return data.(string), nil
+	default:
+		return "", fmt.Errorf("not found")
+	}
+}
+
+func WriteInConfigCurrentVersion(key, value string) error {
+	if currentVersions == nil {
+		currentVersions = initViper("current_version.yaml")
+	}
+	currentVersions.Set(key, value)
+	err := currentVersions.WriteConfig()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func initViper(file string) *viper.Viper {
