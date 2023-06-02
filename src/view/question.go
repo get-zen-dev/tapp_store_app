@@ -14,7 +14,7 @@ type QuestionConcrete struct {
 }
 
 func NewModelQuestion() (*QuestionConcrete, error) {
-	m := QuestionConcrete{shortQuestion.NewQuestionConcreteDomen()}
+	m := QuestionConcrete{shortQuestion.NewQuestionConcreteDomain()}
 	return &m, nil
 }
 
@@ -34,9 +34,9 @@ func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, constants.Keys.QuitWithoutQ):
 			return m, tea.Quit
 		case key.Matches(msg, constants.Keys.Enter):
-			domen := m.question.Input().Value()
-			env.WriteInConfig("app.yaml", "domen", domen)
-			env.GetDomen()
+			domain := m.question.Input().Value()
+			env.WriteInConfig("app.yaml", "domain", domain)
+			env.GetDomain()
 			m.question.SetAnswered(true)
 			next := NewModelWaiting(
 				func() error {

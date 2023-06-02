@@ -62,12 +62,12 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	domen, _          = env.GetDomen()
-	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
+	domain, _         = env.GetDomain()
+	clientMicrok8s, _ = k8.GetInterfaceProvider(domain)
 
 	initStyle = style.InitStyles(*theme.DefaultTheme)
 
-	emptyState     = "not found"
+	emptyState = "not found"
 )
 
 type Item struct {
@@ -209,7 +209,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SyncViewPortContent()
 	case Delete:
 		if msg.err != nil {
-			m.lastError = msg.err.Error()
+			m.lastError = "error: " + msg.err.Error()
 		} else {
 			m.table.Rows[msg.index][Status] = Deleted
 			env.WriteInConfigCurrentVersion(m.table.Rows[msg.index][Title], "")
@@ -268,7 +268,7 @@ func (m *Model) View() string {
 	message := m.lastError
 	m.lastError = ""
 	if message == "" {
-		message = fmt.Sprintf("https://%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domen)
+		message = fmt.Sprintf("https://%s.%s", m.table.Rows[m.table.GetCurrItem()][Title], domain)
 	}
 	return lipgloss.JoinVertical(lipgloss.Left,
 		m.table.View(),

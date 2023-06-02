@@ -12,7 +12,7 @@ var (
 	repository                   = "tapp_store_rep"
 	path                         = "addons"
 	ref                          = "main"
-	domen                        = ""
+	domain                       = ""
 	currentVersions *viper.Viper = nil
 )
 
@@ -36,14 +36,14 @@ func GetRef() string {
 	return ref
 }
 
-// Returns the domen
-func GetDomen() (string, error) {
-	if domen != "" {
-		return domen, nil
+// Returns the domain
+func GetDomain() (string, error) {
+	if domain != "" {
+		return domain, nil
 	}
-	domenRead, err := ReadFromConfig("app.yaml", "domen")
-	domen = domenRead
-	return domenRead, err
+	domainRead, err := ReadFromConfig("app.yaml", "domain")
+	domain = domainRead
+	return domainRead, err
 }
 
 func ReadFromConfigCurrentVersion(key string) (string, error) {

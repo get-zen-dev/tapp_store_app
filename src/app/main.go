@@ -22,7 +22,7 @@ func printErrorIfNotNil(err error) {
 }
 
 func main() {
-	domen, err := env.GetDomen()
+	domain, err := env.GetDomain()
 	if err != nil {
 		q, err := view.NewModelQuestion()
 		printErrorIfNotNil(err)
@@ -31,7 +31,7 @@ func main() {
 			printErr(err)
 		}
 	} else {
-		clientMicrok8s, err := k8.GetInterfaceProvider(domen)
+		clientMicrok8s, err := k8.GetInterfaceProvider(domain)
 		printErrorIfNotNil(err)
 		w := view.NewModelWaiting(
 			func() error {

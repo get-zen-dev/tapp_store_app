@@ -73,7 +73,7 @@ func DefaultStyles() Styles {
 	return s
 }
 
-func NewQuestionConcreteDomen() Question {
+func NewQuestionConcreteDomain() Question {
 	return NewQuestion(QUESTION, PLACEHOLDER)
 }
 

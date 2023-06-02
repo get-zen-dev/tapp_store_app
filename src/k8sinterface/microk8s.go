@@ -111,6 +111,5 @@ func kuberInitialization() error {
 }
 
 func (m *microk8sClient) GetModuleUrl(name string) (url.URL, error) {
-	//TODO: Чтение путей из microk8s
-	return url.URL{Host: "localhost", Scheme: "https"}, nil
+	return url.URL{Host: m.domainName, Scheme: "https", Path: name}, nil
 }
