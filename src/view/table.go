@@ -164,16 +164,15 @@ func (m *Model) updateStatus() error {
 		return err
 	}
 	for i := 0; i < len(m.table.Rows); i++ {
-		title := m.table.Rows[i][Title]
-		info, err := m.clientMicrok8s.GetCachedModuleInfo(title)
+		title := &m.table.Rows[i][Title]
+		info, err := m.clientMicrok8s.GetCachedModuleInfo(*title)
 		if err != nil {
 			return err
 		}
-		curVersion, _ := env.ReadFromConfigCurrentVersion(title)
-		if info.IsEnabled && curVersion == "" {
+		if info.IsEnabled && m.table.Rows[i][Status] == Deleted {
 			m.table.Rows[i][Status] = Installed
 			version := m.table.Rows[i][Version]
-			env.WriteInConfigCurrentVersion(title, version)
+			env.WriteInConfigCurrentVersion(*title, version)
 			m.table.Rows[i][CurrentVersion] = version
 		}
 	}
