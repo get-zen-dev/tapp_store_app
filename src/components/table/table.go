@@ -45,8 +45,8 @@ func (m Model) View() string {
 }
 
 func (m *Model) SetDimensions(dimensions constants.Dimensions) {
-	m.dimensions = constants.Dimensions{listviewport.Max(m.minDimensions.Width, dimensions.Width),
-		listviewport.Max(m.minDimensions.Height, dimensions.Height)}
+	m.dimensions = constants.Dimensions{Width: listviewport.Max(m.minDimensions.Width, dimensions.Width),
+		Height: listviewport.Max(m.minDimensions.Height, dimensions.Height)}
 	m.rowsViewport.SetDimensions(constants.Dimensions{
 		Width:  m.dimensions.Width,
 		Height: m.dimensions.Height,

@@ -6,10 +6,8 @@ import (
 )
 
 var (
-	SearchHeight       = 3
 	HeaderHeight       = 2
 	FooterHeight       = 2
-	SingleRuneWidth    = 4
 	TableHeaderHeight  = 2
 	ListPagerHeight    = 2
 )

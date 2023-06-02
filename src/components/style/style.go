@@ -60,7 +60,6 @@ func InitStyles(theme theme.Theme) Styles {
 	s.Table.TitleCellStyle = s.Table.CellStyle.Copy().
 		Bold(true).
 		Foreground(theme.PrimaryText)
-	s.Table.SingleRuneTitleCellStyle = s.Table.TitleCellStyle.Copy().Width(common.SingleRuneWidth)
 	s.Table.HeaderStyle = lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(theme.FaintBorder).
