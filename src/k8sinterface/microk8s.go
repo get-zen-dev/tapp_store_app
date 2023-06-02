@@ -2,9 +2,11 @@ package k8sinterface
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 const commandCore = "microk8s"
@@ -26,8 +28,18 @@ func (m *microk8sClient) Start() error {
 			return err
 		}
 	}
-
-	return invokeCommand(commandCore, "start")
+	err := invokeCommand(commandCore, "start")
+	if err != nil {
+		return err
+	}
+	for i := 0; i < 5 && !strings.Contains(m.currentStatusCache, "microk8s is running"); i++ {
+		m.RefreshInfoCache()
+		time.Sleep(time.Second)
+	}
+	if !strings.Contains(m.currentStatusCache, "microk8s is running") {
+		return fmt.Errorf("failed to start microk8s client")
+	}
+	return nil
 }
 
 func (m *microk8sClient) Stop() error {

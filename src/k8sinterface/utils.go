@@ -17,7 +17,7 @@ func setupRepositoryOfAddons() error {
 	return nil
 }
 
-func checkIsRootGranted() bool {
+func CheckIsRootGranted() bool {
 	cmd := "id"
 	out, _ := exec.Command("sh", "-c", cmd).Output()
 	return strings.Contains(string(out), "uid=0")

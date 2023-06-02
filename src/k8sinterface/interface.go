@@ -24,7 +24,7 @@ type KuberInterface interface {
 }
 
 func GetInterfaceProvider(domain string) (KuberInterface, error) {
-	if !checkIsRootGranted() {
+	if !CheckIsRootGranted() {
 		return nil, errors.New("cannot user interface without root privileges")
 	}
 
