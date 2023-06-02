@@ -62,12 +62,10 @@ func (m *microk8sClient) GetCachedModuleInfo(name string) (*ModuleInfo, error) {
 	status := m.currentStatusCache
 	_, enableAndDisable, find := strings.Cut(status, "  enabled:")
 	if !find {
-		panic(status)
 		return nil, errors.New(name + ": enable modules not found")
 	}
 	enable, disable, find := strings.Cut(enableAndDisable, "  disabled:")
 	if !find {
-		panic(status)
 		return nil, errors.New(name + ": disabled modules not found")
 	}
 
@@ -116,5 +114,5 @@ func kuberInitialization() error {
 }
 
 func (m *microk8sClient) GetModuleUrl(name string) url.URL {
-	return url.URL{Host: m.domainName, Scheme: "https", Path: name}
+	return url.URL{Host: name + "." + m.domainName, Scheme: "https"}
 }
