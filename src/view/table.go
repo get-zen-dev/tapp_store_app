@@ -62,7 +62,7 @@ var (
 		{Title: ColumnTitleDescription, Width: ColumnMinSizeDescription, MinWidth: ColumnMinSizeDescription, Flex: ColumnFlexDescription},
 	}
 
-	domen, _          = env.ReadFromConfig("app.yaml", "domen")
+	domen, _          = env.GetDomen()
 	clientMicrok8s, _ = k8.GetInterfaceProvider(domen)
 
 	initStyle = style.InitStyles(*theme.DefaultTheme)
@@ -194,6 +194,7 @@ type Install struct {
 
 type Delete struct {
 	index int
+	err   error
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -208,10 +209,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.table.SyncViewPortContent()
 	case Delete:
-		m.table.Rows[msg.index][Status] = Deleted
-		env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
-		m.table.Rows[msg.index][CurrentVersion] = ""
-		m.table.SyncViewPortContent()
+		if msg.err != nil {
+			m.lastError = msg.err.Error()
+		} else {
+			m.table.Rows[msg.index][Status] = Deleted
+			env.WriteInConfig(currentVersion, m.table.Rows[msg.index][Title], "")
+			m.table.Rows[msg.index][CurrentVersion] = ""
+			m.table.SyncViewPortContent()
+		}
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keys.Quit):
@@ -242,8 +247,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			index := m.table.GetCurrItem()
 			name := m.table.Rows[index][Title]
 			return m, func() tea.Msg {
-				clientMicrok8s.RemoveModule(name)
-				return Delete{index}
+				return Delete{index, clientMicrok8s.RemoveModule(name)}
 			}
 		case key.Matches(msg, constants.Keys.Update):
 			index := m.table.GetCurrItem()

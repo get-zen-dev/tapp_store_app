@@ -22,7 +22,7 @@ func printErrorIfNotNil(err error) {
 }
 
 func main() {
-	domen, err := env.ReadFromConfig("app.yaml", "domen")
+	domen, err := env.GetDomen()
 	if err != nil {
 		q, err := view.NewModelQuestion()
 		printErrorIfNotNil(err)

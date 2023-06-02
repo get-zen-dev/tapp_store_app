@@ -12,6 +12,7 @@ var (
 	repository = "tapp_store_rep"
 	path       = "addons"
 	ref        = "main"
+	domen      = ""
 )
 
 // Returns the name of owner of the repository with addons
@@ -32,6 +33,16 @@ func GetPath() string {
 // Returns the ref in the repository
 func GetRef() string {
 	return ref
+}
+
+// Returns the domen
+func GetDomen() (string, error) {
+	if domen != "" {
+		return domen, nil
+	}
+	domenRead, err := ReadFromConfig("app.yaml", "domen")
+	domen = domenRead
+	return domenRead, err
 }
 
 func initViper(file string) *viper.Viper {

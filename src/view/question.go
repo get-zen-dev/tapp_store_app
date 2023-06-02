@@ -36,6 +36,7 @@ func (m *QuestionConcrete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, constants.Keys.Enter):
 			domen := m.question.Input().Value()
 			env.WriteInConfig("app.yaml", "domen", domen)
+			env.GetDomen()
 			m.question.SetAnswered(true)
 			next := NewModelWaiting(
 				func() error {
