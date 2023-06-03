@@ -3,8 +3,8 @@ package k8sinterface
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -121,6 +121,21 @@ func kuberInitialization() error {
 		return errors.Join(errors.New("error on microk8s addons installing: "+out), err)
 	}
 
+	for i := 0; i < 5 && !strings.Contains(out, "microk8s is running"); i++ {
+		err = invokeCommand(commandCore, "status", "--wait-ready")
+		println(i)
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to start microk8s client")
+	}
+
+	println("SUPER MEGA WAITING:")
+	time.Sleep(time.Second * 30)
+	println("Installing cert:")
 	err = applyConfigToKuber(cfg_certs_yml)
 	if err != nil {
 		return errors.Join(errors.New("error on microk8s installing certs"), err)
@@ -135,28 +150,18 @@ func (m *microk8sClient) GetModuleUrl(name string) url.URL {
 
 func applyConfigToKuber(config string) error {
 
-	file, err := os.Create("temp.yml")
-	if err != nil {
-		return err
-	}
-	err = file.Chmod(0777)
-	if err != nil {
-		return err
-	}
+	cmd := exec.Command(commandCore, "kubectl", "apply", "-f", "-")
+	reader, writer := io.Pipe()
+	cmd.Stdin = reader
 
-	data := []byte(config)
-	_, err = file.Write(data)
+	go func() {
+		defer writer.Close()
+		writer.Write([]byte(config))
+	}()
+
+	out, err := cmd.Output()
 	if err != nil {
-		return err
-	}
-
-	out, err := invokeCommandWithOutput(commandCore, "kubectl", "apply", "-f", "./temp.yml")
-
-	defer file.Close()
-	defer os.Remove(file.Name())
-
-	if err != nil {
-		return errors.Join(errors.New("Incorrect apply certs: "+out), err)
+		return errors.Join(errors.New("Incorrect apply certs: "+string(out)), err)
 	}
 
 	return nil

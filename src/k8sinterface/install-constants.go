@@ -8,7 +8,6 @@ metadata:
   name: letsencrypt-certs
 spec:
   acme:
-    email: exampeler@gmail.com
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-certs
