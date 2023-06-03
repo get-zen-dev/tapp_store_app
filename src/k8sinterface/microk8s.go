@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -102,24 +103,27 @@ func (m *microk8sClient) RefreshInfoCache() error {
 }
 
 func kuberInitialization() error {
-	err := invokeCommand("snap", "install", "microk8s", "--classic", "--channel=1.24/stable")
+	out, err := invokeCommandWithOutput("snap", "install", "microk8s", "--classic", "--channel=1.25/stable")
 	if err != nil {
-		return errors.Join(errors.New("incorrect microk8s install"), err)
+		return errors.Join(errors.New("incorrect microk8s install: "+out), err)
 	}
 
-	err = invokeCommand(commandCore, "start")
+	out, err = invokeCommandWithOutput(commandCore, "start")
 	if err != nil {
-		return errors.Join(errors.New("error on microk8s starting"), err)
+		return errors.Join(errors.New("error on microk8s starting: "+out), err)
 	}
 
-	addons := []string{"dns", "community", "traefik"}
+	toInvoke := []string{"enable"}
+	toInvoke = append(toInvoke, microk8s_addons...)
 
-	for i := range addons {
-		addon := addons[i]
-		err = invokeCommand(commandCore, "enable", addon)
-		if err != nil {
-			return errors.Join(errors.New("incorrect install of microk8s addon - "+addon), err)
-		}
+	out, err = invokeCommandWithOutput(commandCore, toInvoke...)
+	if err != nil {
+		return errors.Join(errors.New("error on microk8s addons installing: "+out), err)
+	}
+
+	err = applyConfigToKuber(cfg_certs_yml)
+	if err != nil {
+		return errors.Join(errors.New("error on microk8s installing certs"), err)
 	}
 
 	return setupRepositoryOfAddons()
@@ -127,4 +131,33 @@ func kuberInitialization() error {
 
 func (m *microk8sClient) GetModuleUrl(name string) url.URL {
 	return url.URL{Host: name + "." + m.domainName, Scheme: "https"}
+}
+
+func applyConfigToKuber(config string) error {
+
+	file, err := os.Create("temp.yml")
+	if err != nil {
+		return err
+	}
+	err = file.Chmod(0777)
+	if err != nil {
+		return err
+	}
+
+	data := []byte(config)
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+
+	out, err := invokeCommandWithOutput(commandCore, "kubectl", "apply", "-f", "./temp.yml")
+
+	defer file.Close()
+	defer os.Remove(file.Name())
+
+	if err != nil {
+		return errors.Join(errors.New("Incorrect apply certs: "+out), err)
+	}
+
+	return nil
 }

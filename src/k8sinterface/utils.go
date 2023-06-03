@@ -29,6 +29,12 @@ func invokeCommand(command string, args ...string) error {
 	return err
 }
 
+func invokeCommandWithOutput(command string, args ...string) (string, error) {
+	cmd := exec.Command(command, args...)
+	out, err := cmd.Output()
+	return string(out), err
+}
+
 func checkInstall(app string) bool {
 	cmd := fmt.Sprintf("dpkg -l | grep -w %s", app)
 	_, err := exec.Command("sh", "-c", cmd).Output()
