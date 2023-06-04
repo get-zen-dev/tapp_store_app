@@ -25,8 +25,11 @@ func CheckIsRootGranted() bool {
 
 func invokeCommand(command string, args ...string) error {
 	cmd := exec.Command(command, args...)
-	_, err := cmd.Output()
-	return err
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s; %s", out, err.Error())
+	}
+	return nil
 }
 
 func invokeCommandWithOutput(command string, args ...string) (string, error) {

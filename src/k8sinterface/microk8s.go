@@ -2,7 +2,6 @@ package k8sinterface
 
 import (
 	"errors"
-	"fmt"
 	"net/url"
 	"os"
 	"os/exec"
@@ -33,12 +32,9 @@ func (m *microk8sClient) Start() error {
 	if err != nil {
 		return err
 	}
-	for i := 0; i < 5 && !strings.Contains(m.currentStatusCache, "microk8s is running"); i++ {
+	for !strings.Contains(m.currentStatusCache, "microk8s is running") {
 		m.RefreshInfoCache()
 		time.Sleep(time.Second)
-	}
-	if !strings.Contains(m.currentStatusCache, "microk8s is running") {
-		return fmt.Errorf("failed to start microk8s client")
 	}
 	return nil
 }
@@ -49,7 +45,7 @@ func (m *microk8sClient) Stop() error {
 }
 
 func (m *microk8sClient) InstallModule(name string) (*ModuleInfo, error) {
-	err := invokeCommand(commandCore, "enable", name)
+	err := invokeCommand(commandCore, "enable", name, "--domain", m.domainName)
 	if err != nil {
 		return nil, err
 	}
