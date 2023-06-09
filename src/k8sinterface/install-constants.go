@@ -1,11 +1,20 @@
 package k8sinterface
 
-var repositoryName = "get-zen"
-var repositoryLink = "https://github.com/get-zen-dev/tapp_store_rep"
+import "time"
+
+const repositoryName = "get-zen"
+const repositoryLink = "https://github.com/get-zen-dev/tapp_store_rep"
+
+const microk8sVersion = "--channel=1.25/stable"
 
 var microk8sAddons = []string{"dns", "ingress", "cert-manager"}
 
-var cfgCertsYml = `apiVersion: cert-manager.io/v1
+const commandCore = "microk8s"
+
+const awaitKubeInitializeForCertTimeout = time.Second * 10
+const iterationRetryTimeout = time.Second
+
+const cfgCertsYml = `apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-certs
