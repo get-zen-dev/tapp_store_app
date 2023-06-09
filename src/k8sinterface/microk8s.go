@@ -110,14 +110,14 @@ func kuberInitialization() error {
 	}
 
 	toInvoke := []string{"enable"}
-	toInvoke = append(toInvoke, microk8s_addons...)
+	toInvoke = append(toInvoke, microk8sAddons...)
 
 	out, err = invokeCommandWithOutput(commandCore, toInvoke...)
 	if err != nil {
 		return errors.Join(errors.New("error on microk8s addons installing: "+out), err)
 	}
 
-	err = applyConfigToKuber(cfg_certs_yml)
+	err = applyConfigToKuber(cfgCertsYml)
 	if err != nil {
 		return errors.Join(errors.New("error on microk8s installing certs"), err)
 	}

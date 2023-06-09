@@ -8,8 +8,6 @@ import (
 )
 
 func setupRepositoryOfAddons() error {
-	repositoryName := "get-zen"
-	repositoryLink := "https://github.com/get-zen-dev/tapp_store_rep"
 	err := invokeCommand(commandCore, "addons", "repo", "add", repositoryName, repositoryLink)
 	if err != nil {
 		return errors.Join(errors.New("can't initialize link with addons repository"), err)
@@ -34,7 +32,7 @@ func invokeCommand(command string, args ...string) error {
 
 func invokeCommandWithOutput(command string, args ...string) (string, error) {
 	cmd := exec.Command(command, args...)
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 	return string(out), err
 }
 

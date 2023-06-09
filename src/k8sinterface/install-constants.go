@@ -1,14 +1,16 @@
 package k8sinterface
 
-var microk8s_addons = []string{"dns", "ingress", "cert-manager"}
+var repositoryName = "get-zen"
+var repositoryLink = "https://github.com/get-zen-dev/tapp_store_rep"
 
-var cfg_certs_yml = `apiVersion: cert-manager.io/v1
+var microk8sAddons = []string{"dns", "ingress", "cert-manager"}
+
+var cfgCertsYml = `apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-certs
 spec:
   acme:
-    email: exampeler@gmail.com
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-certs
