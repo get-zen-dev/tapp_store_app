@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -97,7 +99,7 @@ func (m *microk8sClient) GetCachedModuleInfo(name string) (*ModuleInfo, error) {
 
 func (m *microk8sClient) RefreshInfoCache() error {
 	cmd := exec.Command(commandCore, "status")
-	stdout, err := cmd.Output()
+	stdout, err := cmd.CombinedOutput()
 	m.currentStatusCache = string(stdout)
 	return err
 }
@@ -123,7 +125,7 @@ func kuberInitialization() error {
 
 	for i := 0; i < 5 && !strings.Contains(out, "microk8s is running"); i++ {
 		err = invokeCommand(commandCore, "status", "--wait-ready")
-		println(i)
+		println("Wait count = " + strconv.Itoa(i))
 		if err == nil {
 			break
 		}
@@ -134,9 +136,18 @@ func kuberInitialization() error {
 	}
 
 	println("SUPER MEGA WAITING:")
-	time.Sleep(time.Second * 30)
+	time.Sleep(time.Second * 10)
 	println("Installing cert:")
-	err = applyConfigToKuber(cfg_certs_yml)
+
+	err = errors.New("")
+	for err != nil {
+		err = applyConfigToKuber(cfg_certs_yml)
+		if err != nil {
+			println("Error on cert apply: " + err.Error())
+			println("Retrying...")
+			time.Sleep(time.Second)
+		}
+	}
 	if err != nil {
 		return errors.Join(errors.New("error on microk8s installing certs"), err)
 	}
@@ -150,6 +161,40 @@ func (m *microk8sClient) GetModuleUrl(name string) url.URL {
 
 func applyConfigToKuber(config string) error {
 
+	cfgFileName := "config.yml"
+	cfgFile, err := os.Create(cfgFileName)
+	if err != nil {
+		return errors.Join(errors.New("error on creating file for certs"), err)
+	}
+	go func() {
+		defer cfgFile.Close()
+		defer os.Remove(cfgFileName)
+		cfgFile.Write([]byte(config))
+	}()
+
+	execFileName := "kubeapply.sh"
+	execFile, err := os.Create(execFileName)
+	if err != nil {
+		return errors.Join(errors.New("error on creating file for certs"), err)
+	}
+	go func() {
+		defer execFile.Close()
+		defer os.Remove(execFileName)
+		execStr := commandCore + " kubectl apply -f " + cfgFileName
+		execFile.Write([]byte(execStr))
+	}()
+
+	cmd := exec.Command("/bin/bash", execFileName)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.Join(errors.New("Incorrect apply certs: "+string(out)), err)
+	}
+
+	return nil
+}
+
+func applyConfigToKuber1(config string) error {
+
 	cmd := exec.Command(commandCore, "kubectl", "apply", "-f", "-")
 	reader, writer := io.Pipe()
 	cmd.Stdin = reader
@@ -159,7 +204,37 @@ func applyConfigToKuber(config string) error {
 		writer.Write([]byte(config))
 	}()
 
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.Join(errors.New("Incorrect apply certs: "+string(out)), err)
+	}
+	return nil
+}
+
+func applyConfigToKuber2(config string) error {
+
+	cfgFileName := "config.yml"
+	cfgFile, err := os.Create(cfgFileName)
+	if err != nil {
+		return err
+	}
+	cfgFile.Write([]byte(config))
+
+	execStr := commandCore + " kubectl apply -f " + cfgFileName
+	execFileName := "kubeapply.sh"
+	execFile, err := os.Create(execFileName)
+	if err != nil {
+		return err
+	}
+	execFile.Write([]byte(execStr))
+
+	defer cfgFile.Close()
+	defer execFile.Close()
+	defer os.Remove(cfgFileName)
+	defer os.Remove(execFileName)
+
+	cmd := exec.Command("/bin/bash", execFileName)
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return errors.Join(errors.New("Incorrect apply certs: "+string(out)), err)
 	}
