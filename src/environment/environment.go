@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	folder             = "/usr/local/tapp_store_app/configs/"
-	AddonsFile         = folder + "addons.yaml"
+	folder             = "/usr/local/tapp_store_app/"
+	folderConfigs      = folder + "configs/"
+	folderLog          = folder + "log/"
+	AddonsFile         = folderConfigs + "addons.yaml"
 	currentVersionFile = "current_version.yaml"
 	appFile            = "app.yaml"
 )
@@ -82,13 +84,16 @@ func WriteInConfigCurrentVersion(key, value string) error {
 }
 
 func CreateFolderNotExist() {
-	os.MkdirAll(folder, os.ModeDir)
+	os.MkdirAll(folderConfigs, os.ModeDir)
+	os.Chmod(folderConfigs, os.FileMode(0667))
+	os.MkdirAll(folderLog, os.ModeDir)
+	os.Chmod(folderLog, os.FileMode(0667))
 	os.Chmod(folder, os.FileMode(0667))
 }
 
 func initViper(file string) *viper.Viper {
 	v := viper.New()
-	v.SetConfigFile(folder + file)
+	v.SetConfigFile(folderConfigs + file)
 	err := v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(*os.PathError); !ok {
