@@ -70,6 +70,7 @@ func (l OutputLog) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		l.prev.Width = msg.Width
 		l.prev.Height = msg.Height
 		l.prev.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort - HeightMessage})
+		l.prev.table.SyncViewPortContent()
 	}
 	var cmd tea.Cmd
 	l.viewport, cmd = l.viewport.Update(msg)
