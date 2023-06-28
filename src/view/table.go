@@ -6,6 +6,7 @@ import (
 	"errors"
 	he "handleException"
 	k8 "k8sinterface"
+	"os"
 	"requests"
 	"style"
 	"table"
@@ -13,6 +14,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/lipgloss"
+
+	"log"
 
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
@@ -108,6 +111,7 @@ type Model struct {
 	help           help.Model
 	lastError      string
 	clientMicrok8s k8.KuberInterface
+	logger         *log.Logger
 }
 
 func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
@@ -138,6 +142,8 @@ func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
 	m.style = &initStyle
 	m.help = help.New()
 	m.lastError = ""
+	file, _ := os.OpenFile(env.FileLog, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	m.logger = log.New(file, "\n\n", log.LstdFlags)
 	return &m, nil
 }
 
@@ -201,12 +207,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SyncViewPortContent()
 	case Install:
 		if msg.err != nil {
-			m.lastError = "error: " + msg.err.Error()
+			m.logger.Println(msg.err.Error())
+			m.lastError = "addon installation error"
 		}
 		m.table.SyncViewPortContent()
 	case Delete:
 		if msg.err != nil {
-			m.lastError = "error: " + msg.err.Error()
+			m.logger.Println(msg.err.Error())
+			m.lastError = "addon removal error"
 		} else {
 			m.table.Rows[msg.index][Status] = Deleted
 			env.WriteInConfigCurrentVersion(m.table.Rows[msg.index][Title], "")

@@ -12,6 +12,7 @@ const (
 	folder             = "/usr/local/tapp_store_app/"
 	folderConfigs      = folder + "configs/"
 	folderLog          = folder + "log/"
+	FileLog            = folderLog + "errors.log"
 	AddonsFile         = folderConfigs + "addons.yaml"
 	currentVersionFile = "current_version.yaml"
 	appFile            = "app.yaml"
@@ -89,6 +90,7 @@ func CreateFolderNotExist() {
 	os.MkdirAll(folderLog, os.ModeDir)
 	os.Chmod(folderLog, os.FileMode(0667))
 	os.Chmod(folder, os.FileMode(0667))
+	os.Create(FileLog)
 }
 
 func initViper(file string) *viper.Viper {
