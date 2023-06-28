@@ -90,7 +90,6 @@ func CreateFolderNotExist() {
 	os.MkdirAll(folderLog, os.ModeDir)
 	os.Chmod(folderLog, os.FileMode(0667))
 	os.Chmod(folder, os.FileMode(0667))
-	os.Create(FileLog)
 }
 
 func initViper(file string) *viper.Viper {
