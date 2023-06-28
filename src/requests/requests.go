@@ -39,6 +39,9 @@ func DownloadInfoAddons() error {
 		context.Background(),
 		env.GetOwner(), env.GetRepository(), "addons.yaml",
 		&github.RepositoryContentGetOptions{Ref: env.GetRef()})
+	if res == nil {
+		return errors.New("connection failure")
+	}
 	if res.Rate.Remaining == 0 && err != nil {
 		e := errors.New("number of requests available early 0")
 		errors.Join(err, e)
