@@ -8,11 +8,18 @@ import (
 	he "handleException"
 )
 
+const (
+	folder             = "/usr/local/tapp_store_app/configs/"
+	AddonsFile         = folder + "addons.yaml"
+	currentVersionFile = "current_version.yaml"
+	appFile            = "app.yaml"
+)
+
 var (
+	ref                          = "main"
 	owner                        = "get-zen-dev"
 	repository                   = "tapp_store_rep"
 	path                         = "addons"
-	ref                          = "main"
 	domain                       = ""
 	currentVersions *viper.Viper = nil
 )
@@ -42,7 +49,7 @@ func GetDomain() (string, error) {
 	if domain != "" {
 		return domain, nil
 	}
-	domainRead, err := ReadFromConfig("app.yaml", "domain")
+	domainRead, err := ReadFromConfig(appFile, "domain")
 	domain = domainRead
 	return domainRead, err
 }
@@ -50,7 +57,7 @@ func GetDomain() (string, error) {
 // Returns the installed version of the addon by name
 func ReadFromConfigCurrentVersion(key string) (string, error) {
 	if currentVersions == nil {
-		currentVersions = initViper("current_version.yaml")
+		currentVersions = initViper(currentVersionFile)
 	}
 	data := currentVersions.Get(key)
 	switch data.(type) {
@@ -64,7 +71,7 @@ func ReadFromConfigCurrentVersion(key string) (string, error) {
 // Writes the addon version by name
 func WriteInConfigCurrentVersion(key, value string) error {
 	if currentVersions == nil {
-		currentVersions = initViper("current_version.yaml")
+		currentVersions = initViper(currentVersionFile)
 	}
 	currentVersions.Set(key, value)
 	err := currentVersions.WriteConfig()
@@ -74,9 +81,14 @@ func WriteInConfigCurrentVersion(key, value string) error {
 	return nil
 }
 
+func CreateFolderNotExist() {
+	os.MkdirAll(folder, os.ModeDir)
+	os.Chmod(folder, os.FileMode(0667))
+}
+
 func initViper(file string) *viper.Viper {
 	v := viper.New()
-	v.SetConfigFile("./../configs/" + file)
+	v.SetConfigFile(folder + file)
 	err := v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(*os.PathError); !ok {
@@ -117,7 +129,7 @@ func ReadInfoAddonsModels() *Models {
 }
 
 func ReadInfoAddonsSlice() *[]map[string]string {
-	viper.SetConfigFile("./../configs/addons.yaml")
+	viper.SetConfigFile(AddonsFile)
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println(err)

@@ -5,14 +5,13 @@ import (
 	"fmt"
 	he "handleException"
 	k8 "k8sinterface"
-	"os"
 	"view"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	os.MkdirAll("./../configs", os.ModeDir);
+	env.CreateFolderNotExist()
 	if !k8.CheckIsRootGranted() {
 		he.PrintErr(fmt.Errorf("cannot user interface without root privileges"))
 	}

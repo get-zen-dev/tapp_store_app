@@ -47,9 +47,8 @@ func DownloadInfoAddons() error {
 		return err
 	}
 	content, err := fileContent.GetContent()
-	os.WriteFile("./../configs/addons.yaml", []byte(content), os.FileMode(0666))
 	if err != nil {
 		return err
 	}
-	return nil
+	return os.WriteFile(env.AddonsFile, []byte(content), os.FileMode(0666))
 }
