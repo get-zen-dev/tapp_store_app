@@ -20,13 +20,14 @@ type KeyMap struct {
 	Quit          key.Binding
 	QuitWithoutQ  key.Binding
 	Enter         key.Binding
+	Log           key.Binding
 	HeightShort   int
 	HeightFull    int
 }
 
 // Returns mini help view that automatically generates itself from your KeyMap
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Up, k.Down, k.Install, k.Delete, k.Update}
+	return []key.Binding{k.Up, k.Down, k.Install, k.Delete, k.Update, k.Log}
 }
 
 // Returns full help view that automatically generates itself from your KeyMap
@@ -87,6 +88,10 @@ var Keys = KeyMap{
 	Enter: key.NewBinding(
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "confirm input"),
+	),
+	Log: key.NewBinding(
+		key.WithKeys("l"),
+		key.WithHelp("l", "output a log"),
 	),
 	HeightShort: 2,
 	HeightFull:  4,

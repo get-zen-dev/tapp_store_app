@@ -112,9 +112,11 @@ type Model struct {
 	lastError      string
 	clientMicrok8s k8.KuberInterface
 	logger         *log.Logger
+	Width          int
+	Height         int
 }
 
-func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
+func NewModelTable(clientMicrok8s k8.KuberInterface, width, height int) (*Model, error) {
 	requests.DownloadInfoAddons()
 	m := Model{}
 	m.clientMicrok8s = clientMicrok8s
@@ -144,6 +146,11 @@ func NewModelTable(clientMicrok8s k8.KuberInterface) (*Model, error) {
 	m.lastError = ""
 	file, _ := os.OpenFile(env.FileLog, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	m.logger = log.New(file, "\n\n", log.LstdFlags)
+	m.Width = width
+	m.Height = height
+	m.help.Width = width
+	m.table.SetDimensions(constants.Dimensions{Width: width, Height: height - constants.Keys.HeightShort - HeightMessage})
+	m.table.SyncViewPortContent()
 	return &m, nil
 }
 
@@ -202,6 +209,8 @@ type Delete struct {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		m.Width = msg.Width
+		m.Height = msg.Height
 		m.help.Width = msg.Width
 		m.table.SetDimensions(constants.Dimensions{Width: msg.Width, Height: msg.Height - constants.Keys.HeightShort - HeightMessage})
 		m.table.SyncViewPortContent()
@@ -261,6 +270,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				return nil
 			}
+		case key.Matches(msg, constants.Keys.Log):
+			content, _ := os.ReadFile(env.FileLog)
+			return NewOutputLog(string(content), m, m.Width, m.Height), nil
 		}
 	}
 	return m, nil

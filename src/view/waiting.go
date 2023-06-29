@@ -1,7 +1,6 @@
 package view
 
 import (
-	"constants"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -61,10 +60,7 @@ func (m Waiting) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case Next:
 		he.PrintErrorIfNotNil(msg.value)
-		next, _ := NewModelTable(m.clientMicrok8s)
-		next.help.Width = m.width
-		next.table.SetDimensions(constants.Dimensions{Width: m.width, Height: m.height - constants.Keys.HeightShort - HeightMessage})
-		next.table.SyncViewPortContent()
+		next, _ := NewModelTable(m.clientMicrok8s, m.width, m.height)
 		return next, nil
 	case tea.KeyMsg:
 		switch msg.String() {
